@@ -67,7 +67,6 @@ async function verifyNumber(phoneNumber) {
   );
 }
 
-
 async function verifyLocation(phoneNumber, latitude, longitude, radius = 50000) {
   return camaraPost("/location-verification/v1/verify", {
     device: { phoneNumber },
