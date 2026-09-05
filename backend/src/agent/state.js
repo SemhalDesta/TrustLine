@@ -6,13 +6,16 @@ const { Annotation } = require("@langchain/langgraph");
  * Every node reads from and writes to this shape.
  */
 const TrustLineState = Annotation.Root({
-  // --- input ---
   phoneNumber: Annotation({
     reducer: (_, next) => next,
     default: () => null,
   }),
+  claimedRegion: Annotation({
+  reducer: (_, next) => next,
+  default: () => null,
+}),
 
-  // --- core signal results (set by the 4 core nodes) ---
+
   signals: Annotation({
     reducer: (current, update) => ({ ...current, ...update }),
     default: () => ({
