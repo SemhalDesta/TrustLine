@@ -1,59 +1,66 @@
 /**
  * agent/index.js
  *
- * TEMPORARY STUB — this is the agreed contract/seam between your track
- * (Platform & Integrations) and your teammate's track (AI Agent, which
- * owns agent/graph.js + agent/nodes/* + services/camaraClient.js).
+ * BRIDGE — wires the real LangGraph agent (agent/graph.js) to the contract
+ * that routes/verify.js and routes/platform.js were built against.
  *
- * Build routes/verify.js against THIS function today. When your teammate's
- * real graph.js is ready, either:
- *   (a) they overwrite this file to export the same `runVerification`
- *       function name and return shape, backed by the real LangGraph graph, or
- *   (b) you change ONE line in routes/verify.js to import from their
- *       module instead of this one.
+ * Why this file exists at all: graph.js's own `runVerification` export
+ * returns the graph's raw internal shape ({ riskLevel, explanation,
+ * reasoningTrace, signalsUsed }), which doesn't match what the routes
+ * expect ({ phoneNumber, escalated, verdict: { riskLevel, reasoning,
+ * signalsUsed } }). Rather than change every route, this file translates
+ * once, in one place.
  *
- * Either way, nothing else in your 15 files needs to change — that's the
- * point of agreeing on this contract now.
- *
- * CONTRACT:
- *   runVerification(phoneNumber: string, claimedLocation?: object)
+ * CONTRACT (extended — reasoningTrace added, everything else unchanged):
+ *   runVerification(phoneNumber: string, claimedLocation?: string)
  *     -> Promise<{
  *          phoneNumber: string,
  *          escalated: boolean,
  *          verdict: {
- *            riskLevel: "LOW" | "MEDIUM" | "HIGH" | "UNKNOWN",
+ *            riskLevel: "LOW" | "MEDIUM" | "HIGH",
  *            reasoning: string,
  *            signalsUsed: string[]
- *          }
+ *          },
+ *          reasoningTrace: { step: string, detail: string }[]
  *        }>
- *   Throws on invalid input (route layer catches and returns 400/500).
+ *   Throws on invalid input (route layer catches and returns 400).
+ *
+ * NOTE on claimedLocation: despite the generic name (kept for route
+ * compatibility), agent/graph.js's locationVerificationCheck node expects
+ * a plain region name string from a small lookup table (e.g. "Dubai",
+ * "Doha", "Riyadh" — see agent/nodes/locationVerificationCheck.js), NOT a
+ * {latitude, longitude} object. Pass a string or omit it.
  */
 
-function seedFromNumber(number) {
-  let sum = 0;
-  for (const ch of number) sum += ch.charCodeAt(0);
-  return sum;
-}
+const { compiledGraph } = require("./graph");
 
 async function runVerification(phoneNumber, claimedLocation = null) {
-  if (!phoneNumber || String(phoneNumber).replace(/[^0-9]/g, "").length < 8) {
-    throw new Error("Invalid phone number — please include country code, e.g. +92 71 234 5678");
+  const state = await compiledGraph.invoke({
+    phoneNumber,
+    claimedRegion: claimedLocation,
+  });
+
+  // intake.js sets riskLevel = "INVALID" and routes straight to END on bad
+  // input, rather than throwing itself — translate that into a real throw
+  // here so routes/verify.js's existing 400-vs-500 handling still works.
+  if (state.riskLevel === "INVALID") {
+    throw new Error(`Invalid input: ${state.explanation}`);
   }
 
-  // Deterministic mock so your route/DB/rate-limit tests are repeatable —
-  // the same number always returns the same stub verdict.
-  const seed = seedFromNumber(phoneNumber);
-  const riskLevel = seed % 3 === 0 ? "HIGH" : seed % 3 === 1 ? "MEDIUM" : "LOW";
-
   return {
-    phoneNumber,
-    escalated: seed % 2 === 0,
+    phoneNumber: state.phoneNumber,
+    escalated: Boolean(state.escalate),
     verdict: {
-      riskLevel,
-      reasoning: `[STUB] Mock verdict for ${phoneNumber} — replace with real agent output once graph.js is ready.`,
-      signalsUsed: ["sim_swap", "number_verification", "device_status"],
+      riskLevel: state.riskLevel,
+      reasoning: state.explanation,
+      signalsUsed: state.signalsUsed || [],
     },
+    // Additive field — graph.js's raw state already tracks this per-step
+    // trace internally; the frontend's expandable "how we got this" panel
+    // consumes it directly.
+    reasoningTrace: state.reasoningTrace || [],
   };
 }
 
 module.exports = { runVerification };
+

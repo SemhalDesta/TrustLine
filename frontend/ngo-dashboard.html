@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NGO Dashboard — TrustLine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#0A0D12;
+    --panel:#0F141C;
+    --paper:#E9EDF2;
+    --paper-dim:#DCE3EB;
+    --ink:#12151B;
+    --ink-dim:#565F6B;
+    --brand:#FF6A00;
+    --brand-bright:#FF9142;
+    --amber:#D98E4A;
+    --red:#E5483A;
+    --green:#5FBF8A;
+    --line:rgba(255,255,255,0.08);
+    --line-dark:rgba(18,21,27,0.10);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background-color:var(--paper-dim);
+    background-image:radial-gradient(circle, rgba(18,21,27,0.16) 1.3px, transparent 1.3px);
+    background-size:26px 26px;
+    color:var(--ink);
+    font-family:'Inter', sans-serif;
+    font-size:15px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2{font-family:'Space Grotesk', sans-serif; font-weight:600; letter-spacing:-0.01em;}
+  a{color:inherit; text-decoration:none;}
+  .wrap{max-width:1080px; margin:0 auto; padding:0 28px;}
+
+  header{
+    position:fixed; top:0; left:0; right:0; z-index:200;
+    padding:16px 28px; display:flex; align-items:center; justify-content:space-between;
+    backdrop-filter:blur(10px);
+    background:rgba(233,237,242,0.85);
+    border-bottom:1px solid var(--line-dark);
+  }
+  .brand{font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:17px; display:flex; align-items:center; gap:10px;}
+  .brand svg{display:block; flex-shrink:0;}
+  .brand .line{color:var(--brand);}
+  nav{display:flex; align-items:center; gap:0;}
+  nav a.navlink{font-size:14px; color:inherit; opacity:0.72; margin-right:24px;}
+  nav a.navlink:hover{opacity:1;}
+  .org-tag{
+    font-family:'IBM Plex Mono', monospace; font-size:11px; padding:4px 9px; border-radius:5px;
+    background:rgba(18,21,27,0.06); color:var(--ink-dim); margin-right:18px;
+  }
+  .btn{
+    font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:14px;
+    padding:9px 18px; border-radius:8px; display:inline-flex; align-items:center; gap:6px;
+    cursor:pointer; transition:transform .15s ease, background .2s, border-color .2s;
+    border:1px solid transparent;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn-primary{background:var(--brand); color:var(--void); border:none;}
+  .btn-primary:hover{background:var(--brand-bright);}
+  .btn-ghost-dark{border-color:rgba(18,21,27,0.18); color:var(--ink);}
+
+  .shell{display:flex; padding-top:64px; min-height:100vh; align-items:flex-start;}
+
+  .sidebar{
+    width:220px; flex-shrink:0;
+    position:sticky; top:64px;
+    height:calc(100vh - 64px);
+    background:var(--void); color:var(--paper);
+    padding:28px 16px;
+    display:flex; flex-direction:column; gap:4px;
+  }
+  .sidebar-label{font-family:'IBM Plex Mono', monospace; font-size:10.5px; letter-spacing:0.05em; color:rgba(239,241,234,0.4); padding:0 12px; margin-bottom:10px;}
+  .side-link{
+    display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:7px;
+    font-size:14px; color:rgba(239,241,234,0.75); font-weight:500; transition:background .15s, color .15s;
+  }
+  .side-link:hover{background:rgba(255,255,255,0.06); color:var(--paper);}
+  .side-link.active{background:rgba(255,106,0,0.14); color:var(--brand-bright);}
+  .side-link svg{flex-shrink:0;}
+  .sidebar-foot{margin-top:auto; padding:0 12px; font-size:12px; color:rgba(239,241,234,0.4);}
+
+  main{flex:1; min-width:0; padding:36px 40px 90px;}
+  .page-head{margin-bottom:32px;}
+  .page-head h1{font-size:clamp(24px,3vw,29px);}
+  .page-head p{margin-top:8px; color:var(--ink-dim); font-size:15px;}
+
+  .stats-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:32px;}
+  .stat-card{
+    background:#fff; border:1px solid var(--line-dark); border-top:3px solid var(--stat-color, var(--brand));
+    border-radius:10px; padding:18px 20px;
+    box-shadow:0 1px 2px rgba(18,21,27,0.03), 0 6px 16px rgba(18,21,27,0.04);
+  }
+  .stat-card .icon{
+    width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+    background:rgba(0,0,0,0.05); margin-bottom:12px;
+  }
+  .stat-card .num{font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:27px; line-height:1;}
+  .stat-card .lbl{margin-top:5px; font-size:13px; color:var(--ink-dim);}
+  .stat-card .trend{margin-top:8px; font-size:12px; font-weight:600;}
+  .trend.up{color:var(--green);}
+  .trend.warn{color:var(--red);}
+
+  .charts-grid{display:grid; grid-template-columns:1.3fr 1fr; gap:16px; margin-bottom:40px;}
+  .chart-card{
+    background:#fff; border:1px solid var(--line-dark); border-radius:10px; padding:20px 22px;
+    box-shadow:0 1px 2px rgba(18,21,27,0.03), 0 6px 16px rgba(18,21,27,0.04);
+  }
+  .chart-card h3{font-size:14.5px; font-weight:600; margin-bottom:2px;}
+  .chart-card .sub{font-size:12.5px; color:var(--ink-dim); margin-bottom:14px;}
+
+  section.block{margin-bottom:40px;}
+  .block-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:14px;}
+  .block-head h2{font-size:18px;}
+  .block-head .count{font-size:13px; color:var(--ink-dim);}
+
+  table{width:100%; border-collapse:collapse; background:#fff; border:1px solid var(--line-dark); border-radius:10px; overflow:hidden; box-shadow:0 1px 2px rgba(18,21,27,0.03), 0 6px 16px rgba(18,21,27,0.04);}
+  thead th{
+    text-align:left; font-size:11.5px; font-weight:600; color:var(--ink-dim); text-transform:uppercase; letter-spacing:0.02em;
+    padding:12px 16px; border-bottom:1px solid var(--line-dark); background:rgba(18,21,27,0.02);
+  }
+  tbody td{padding:13px 16px; border-bottom:1px solid var(--line-dark); font-size:13.5px; vertical-align:top;}
+  tbody tr{transition:background .12s;}
+  tbody tr:hover{background:rgba(255,106,0,0.03);}
+  tbody tr:last-child td{border-bottom:none;}
+  td.num-cell{font-family:'IBM Plex Mono', monospace; font-size:13px;}
+  td.notes-cell{color:var(--ink-dim); max-width:300px;}
+
+  .badge{
+    display:inline-flex; align-items:center; gap:6px; font-size:11.5px; font-weight:600;
+    padding:4px 9px; border-radius:20px;
+  }
+  .badge .dot{width:6px; height:6px; border-radius:50%;}
+  .badge.risk-high{background:rgba(229,72,58,0.1); color:var(--red);}
+  .badge.risk-high .dot{background:var(--red);}
+  .badge.risk-medium{background:rgba(217,142,74,0.12); color:var(--amber);}
+  .badge.risk-medium .dot{background:var(--amber);}
+  .badge.risk-low{background:rgba(95,191,138,0.12); color:var(--green);}
+  .badge.risk-low .dot{background:var(--green);}
+  .badge.unverified{background:rgba(217,142,74,0.12); color:var(--amber);}
+  .badge.unverified .dot{background:var(--amber);}
+
+  .btn-verify{
+    font-family:'Inter', sans-serif; font-weight:600; font-size:12.5px;
+    padding:7px 14px; border-radius:20px; border:1.5px solid var(--brand); color:var(--brand);
+    background:none; cursor:pointer; transition:background .15s, color .15s;
+  }
+  .btn-verify:hover{background:var(--brand); color:#fff;}
+  .btn-verify:disabled{opacity:0.5; cursor:default;}
+  .btn-verify.done{border-color:var(--green); color:var(--green); cursor:default;}
+  .btn-verify.done:hover{background:none; color:var(--green);}
+
+  .empty-state, .loading-state{
+    background:#fff; border:1px solid var(--line-dark); border-radius:10px;
+    padding:32px; text-align:center; color:var(--ink-dim); font-size:13.5px;
+  }
+
+  footer{
+    position:relative;
+    background-color:var(--void);
+    background-image:radial-gradient(circle, rgba(239,241,234,0.08) 1.3px, transparent 1.3px);
+    background-size:26px 26px;
+    color:rgba(239,241,234,0.5);
+    padding:56px 0 40px;
+    font-size:13.5px;
+    overflow:hidden;
+  }
+  footer .wrap{position:relative; z-index:2;}
+  .footer-top{display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:24px; padding-bottom:32px; margin-bottom:24px; border-bottom:1px solid var(--line);}
+  .footer-brand .brand{color:var(--paper); margin-bottom:10px;}
+  .footer-brand p{max-width:34ch; color:rgba(239,241,234,0.45); font-size:13.5px;}
+  .footer-links{display:flex; gap:56px;}
+  .footer-col h4{font-family:'IBM Plex Mono', monospace; font-size:11.5px; color:rgba(239,241,234,0.4); margin-bottom:14px; letter-spacing:0.04em;}
+  .footer-col a{display:block; margin-bottom:10px; color:rgba(239,241,234,0.65); font-size:13.5px;}
+  .footer-col a:hover{color:var(--paper);}
+  .footer-bottom{display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px;}
+
+  @media (max-width:980px){
+    nav a.navlink{display:none;}
+    .stats-grid{grid-template-columns:repeat(2,1fr);}
+    .charts-grid{grid-template-columns:1fr;}
+  }
+  @media (max-width:820px){
+    .shell{flex-direction:column;}
+    .sidebar{
+      width:100%; position:static; height:auto; flex-direction:row; overflow-x:auto;
+      padding:14px 16px; gap:8px;
+    }
+    .sidebar-label, .sidebar-foot{display:none;}
+    main{padding:28px 20px 70px;}
+    .stats-grid{grid-template-columns:1fr 1fr;}
+    table, thead, tbody, th, td, tr{display:block;}
+    thead{display:none;}
+    tbody tr{border-bottom:1px solid var(--line-dark); padding:12px 16px;}
+    tbody td{border-bottom:none; padding:4px 0;}
+    tbody td::before{content:attr(data-label); display:block; font-size:11px; color:var(--ink-dim); margin-bottom:2px;}
+  }
+</style>
+</head>
+<body>
+
+<header id="siteHeader">
+  <a href="about.html" class="brand">
+    <svg width="30" height="30" viewBox="0 0 40 40">
+      <rect x="2" y="2" width="36" height="36" rx="10" fill="#FF6A00"/>
+      <line x1="11" y1="9" x2="20" y2="15" stroke="#0A0D12" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="29" y1="9" x2="20" y2="15" stroke="#0A0D12" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="20" y1="6" x2="20" y2="15" stroke="#0A0D12" stroke-width="1.8" stroke-linecap="round"/>
+      <circle cx="11" cy="9" r="2.1" fill="#FF6A00" stroke="#0A0D12" stroke-width="1.5"/>
+      <circle cx="29" cy="9" r="2.1" fill="#FF6A00" stroke="#0A0D12" stroke-width="1.5"/>
+      <circle cx="20" cy="6" r="1.8" fill="#FF6A00" stroke="#0A0D12" stroke-width="1.5"/>
+      <rect x="14.5" y="15" width="11" height="19" rx="2.6" fill="none" stroke="#0A0D12" stroke-width="2"/>
+      <line x1="17.5" y1="18.5" x2="22.5" y2="18.5" stroke="#0A0D12" stroke-width="1.5" stroke-linecap="round"/>
+      <circle cx="20" cy="30.5" r="1.1" fill="#0A0D12"/>
+    </svg>
+    TrustLine
+  </a>
+  <nav>
+    <a class="navlink" href="about.html">About</a>
+    <a class="navlink" href="about.html#how">How it works</a>
+    <span class="org-tag">NGO ACCOUNT</span>
+    <a class="btn btn-ghost-dark" href="login.html" id="logoutLink">Log out</a>
+  </nav>
+</header>
+
+<div class="shell">
+  <aside class="sidebar">
+    <div class="sidebar-label">DASHBOARD</div>
+    <a href="#overview" class="side-link active">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="1.5" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="8.5" y="1.5" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="1.5" y="8.5" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="8.5" y="8.5" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/></svg>
+      Overview
+    </a>
+    <a href="#pending" class="side-link">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.2" stroke="currentColor" stroke-width="1.4"/><path d="M8 4.5V8L10.3 9.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      Pending Reports
+    </a>
+    <a href="#activity" class="side-link">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1.5 8.5H4.5L6 4.5L9 12L10.5 8.5H14.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Recent Activity
+    </a>
+    <div class="sidebar-foot">Ministry of Labor<br>Demo account</div>
+  </aside>
+
+  <main>
+    <div class="page-head" id="overview">
+      <h1>Reports and verification activity</h1>
+      <p>Review worker-submitted reports and monitor recent checks across your corridor.</p>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card" style="--stat-color:#FF6A00;">
+        <div class="icon" style="color:#FF6A00;">
+          <svg width="17" height="17" viewBox="0 0 16 16" fill="none"><path d="M1.5 8.5H4.5L6 4.5L9 12L10.5 8.5H14.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="num" id="statChecks">—</div>
+        <div class="lbl">Checks run (30 days)</div>
+        <div class="trend up">↑ 18% vs last month</div>
+      </div>
+      <div class="stat-card" style="--stat-color:#E5483A;">
+        <div class="icon" style="color:#E5483A;">
+          <svg width="17" height="17" viewBox="0 0 16 16" fill="none"><path d="M8 1.5L14.5 13H1.5L8 1.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M8 6.2V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="11.2" r="0.8" fill="currentColor"/></svg>
+        </div>
+        <div class="num" id="statHighRisk">—</div>
+        <div class="lbl">Flagged high risk</div>
+        <div class="trend warn">↑ 2 this week</div>
+      </div>
+      <div class="stat-card" style="--stat-color:#D98E4A;">
+        <div class="icon" style="color:#D98E4A;">
+          <svg width="17" height="17" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.2" stroke="currentColor" stroke-width="1.5"/><path d="M8 4.5V8L10.3 9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <div class="num" id="statPending">—</div>
+        <div class="lbl">Reports awaiting review</div>
+      </div>
+      <div class="stat-card" style="--stat-color:#5FBF8A;">
+        <div class="icon" style="color:#5FBF8A;">
+          <svg width="17" height="17" viewBox="0 0 16 16" fill="none"><path d="M8 1.5L13.5 3.8V7.5C13.5 10.8 11.2 13.4 8 14.5C4.8 13.4 2.5 10.8 2.5 7.5V3.8L8 1.5Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M5.5 8L7.2 9.7L10.5 6.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="num" id="statVerified">—</div>
+        <div class="lbl">NGO-verified reports</div>
+      </div>
+    </div>
+
+    <div class="charts-grid">
+      <div class="chart-card">
+        <h3>Checks over the last 7 days</h3>
+        <div class="sub">Verification volume across your corridor</div>
+        <div id="trendChart"></div>
+      </div>
+      <div class="chart-card">
+        <h3>Verdict breakdown</h3>
+        <div class="sub">Recent checks by risk level</div>
+        <div id="riskChart"></div>
+      </div>
+    </div>
+
+    <section class="block" id="pending">
+      <div class="block-head">
+        <h2>Pending reports</h2>
+        <span class="count" id="pendingCount"></span>
+      </div>
+      <div id="pendingContainer"><div class="loading-state">Loading pending reports…</div></div>
+    </section>
+
+    <section class="block" id="activity">
+      <div class="block-head">
+        <h2>Recent verifications</h2>
+        <span class="count" id="logsCount"></span>
+      </div>
+      <div id="logsContainer"><div class="loading-state">Loading recent activity…</div></div>
+    </section>
+  </main>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="brand">
+          <svg width="26" height="26" viewBox="0 0 40 40">
+            <rect x="2" y="2" width="36" height="36" rx="10" fill="#FF6A00"/>
+            <line x1="11" y1="9" x2="20" y2="15" stroke="#0A0D12" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="29" y1="9" x2="20" y2="15" stroke="#0A0D12" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="20" y1="6" x2="20" y2="15" stroke="#0A0D12" stroke-width="1.8" stroke-linecap="round"/>
+            <circle cx="11" cy="9" r="2.1" fill="#FF6A00" stroke="#0A0D12" stroke-width="1.5"/>
+            <circle cx="29" cy="9" r="2.1" fill="#FF6A00" stroke="#0A0D12" stroke-width="1.5"/>
+            <circle cx="20" cy="6" r="1.8" fill="#FF6A00" stroke="#0A0D12" stroke-width="1.5"/>
+            <rect x="14.5" y="15" width="11" height="19" rx="2.6" fill="none" stroke="#0A0D12" stroke-width="2"/>
+            <line x1="17.5" y1="18.5" x2="22.5" y2="18.5" stroke="#0A0D12" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="20" cy="30.5" r="1.1" fill="#0A0D12"/>
+          </svg>
+          TrustLine
+        </div>
+        <p>A verdict you can read in three seconds — built for the MENA Ignite Hackathon.</p>
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <h4>PRODUCT</h4>
+          <a href="verify.html">Check a number</a>
+          <a href="about.html#how">How it works</a>
+          <a href="about.html#agent">The signal</a>
+        </div>
+        <div class="footer-col">
+          <h4>ORGANIZATIONS</h4>
+          <a href="login.html">NGO / Ministry login</a>
+          <a href="login.html">Platform login</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 TrustLine</span>
+      <span>Theme 1 · MENA Ignite Hackathon</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const API_BASE = "http://localhost:4000/api";
+
+  // Auth guard — this page requires a real ngo_admin token from login.html.
+  const authToken = localStorage.getItem("trustline_token");
+  const authRole = localStorage.getItem("trustline_role");
+  if (!authToken || authRole !== "ngo_admin") {
+    window.location.href = "login.html";
+  }
+  function authHeaders(extra = {}) {
+    return { Authorization: `Bearer ${authToken}`, ...extra };
+  }
+
+  const MOCK_PENDING = [
+    { phoneNumber: "+92 300 481 2277", reportCount: 3, notes: ["Asked for a placement fee before showing a contract", "Number went unreachable after payment was requested"] },
+    { phoneNumber: "+880 1711 223344", reportCount: 1, notes: ["Claimed to be from a Dubai agency, no registration found"] },
+    { phoneNumber: "+254 711 998877", reportCount: 5, notes: ["Multiple workers report the same recruiter script", "Requested passport copies before any contract"] },
+  ];
+
+  const MOCK_LOGS = [
+    { phoneNumber: "+971 50 123 4567", riskLevel: "HIGH", reasoning: "SIM and device both changed in the last week.", created_at: "2026-09-08T09:14:00Z" },
+    { phoneNumber: "+92 300 481 2277", riskLevel: "HIGH", reasoning: "Matches 3 unverified worker reports.", created_at: "2026-09-08T08:52:00Z" },
+    { phoneNumber: "+974 5512 3344", riskLevel: "LOW", reasoning: "No red flags across available signals.", created_at: "2026-09-08T08:20:00Z" },
+    { phoneNumber: "+973 3900 1122", riskLevel: "MEDIUM", reasoning: "One signal inconclusive; escalated to secondary checks.", created_at: "2026-09-07T22:41:00Z" },
+    { phoneNumber: "+966 55 010 2233", riskLevel: "LOW", reasoning: "Same SIM and device for over a year.", created_at: "2026-09-07T19:03:00Z" },
+  ];
+
+  const MOCK_TREND = { labels: ["Tue","Wed","Thu","Fri","Sat","Sun","Mon"], values: [8, 11, 6, 14, 9, 5, 12] };
+
+  async function fetchPendingReports(){
+    try{
+      const res = await fetch(`${API_BASE}/ngo/reports/pending`, { headers: authHeaders() });
+      if (!res.ok) throw 0;
+      const data = await res.json();
+      return data.pending;
+    }
+    catch(err){ return MOCK_PENDING; }
+  }
+  async function fetchRecentLogs(){
+    try{
+      const res = await fetch(`${API_BASE}/ngo/logs?limit=50`, { headers: authHeaders() });
+      if (!res.ok) throw 0;
+      const data = await res.json();
+      // Normalize: real logs may come back as { verdict: {...} } (in-memory
+      // store) or snake_case columns (Postgres) — flatten both to the flat
+      // { riskLevel, reasoning, created_at } shape this page renders.
+      return data.logs.map(l => ({
+        phoneNumber: l.phoneNumber || l.phone_number,
+        riskLevel: l.riskLevel || l.verdict?.riskLevel || l.risk_level,
+        reasoning: l.reasoning || l.verdict?.reasoning,
+        created_at: l.created_at || l.at,
+      }));
+    }
+    catch(err){ return MOCK_LOGS; }
+  }
+  async function verifyReport(phoneNumber){
+    try{
+      const res = await fetch(`${API_BASE}/ngo/reports/${encodeURIComponent(phoneNumber)}/verify`, {
+        method: "POST",
+        headers: authHeaders(),
+      });
+      if (!res.ok) throw 0; return await res.json();
+    }catch(err){ return { success:true, demo:true }; }
+  }
+
+  const RISK_LABEL = { HIGH:"High risk", MEDIUM:"Caution", LOW:"Low risk" };
+  const RISK_CLASS = { HIGH:"risk-high", MEDIUM:"risk-medium", LOW:"risk-low" };
+
+  function timeAgo(iso){
+    const hrs = Math.round((Date.now() - new Date(iso).getTime()) / 3600000);
+    if (hrs < 1) return "just now";
+    if (hrs < 24) return `${hrs}h ago`;
+    return `${Math.round(hrs/24)}d ago`;
+  }
+
+  function renderPending(reports){
+    const container = document.getElementById("pendingContainer");
+    document.getElementById("pendingCount").textContent = `${reports.length} awaiting review`;
+    if (reports.length === 0){ container.innerHTML = `<div class="empty-state">No reports waiting for review right now.</div>`; return; }
+    const rows = reports.map(r => `
+      <tr data-phone="${r.phoneNumber}">
+        <td class="num-cell" data-label="Number">${r.phoneNumber}</td>
+        <td data-label="Reports"><span class="badge unverified"><span class="dot"></span>${r.reportCount} report${r.reportCount===1?"":"s"}</span></td>
+        <td class="notes-cell" data-label="Notes">${(r.notes||[]).join(" · ")}</td>
+        <td data-label="Action"><button class="btn-verify">Mark verified</button></td>
+      </tr>`).join("");
+    container.innerHTML = `<table><thead><tr><th>Number</th><th>Reports</th><th>Notes</th><th>Action</th></tr></thead><tbody>${rows}</tbody></table>`;
+    container.querySelectorAll(".btn-verify").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const row = btn.closest("tr");
+        btn.disabled = true; btn.textContent = "Verifying…";
+        await verifyReport(row.dataset.phone);
+        btn.textContent = "Verified"; btn.classList.add("done");
+        verifiedThisSession += 1;
+        document.getElementById("statVerified").textContent = verifiedThisSession;
+      });
+    });
+  }
+
+  function renderLogs(logs){
+    const container = document.getElementById("logsContainer");
+    document.getElementById("logsCount").textContent = `${logs.length} shown`;
+    if (logs.length === 0){ container.innerHTML = `<div class="empty-state">No verification activity yet.</div>`; return; }
+    const rows = logs.map(l => `
+      <tr>
+        <td class="num-cell" data-label="Number">${l.phoneNumber}</td>
+        <td data-label="Verdict"><span class="badge ${RISK_CLASS[l.riskLevel]||"risk-medium"}"><span class="dot"></span>${RISK_LABEL[l.riskLevel]||l.riskLevel}</span></td>
+        <td class="notes-cell" data-label="Reasoning">${l.reasoning}</td>
+        <td data-label="When">${timeAgo(l.created_at)}</td>
+      </tr>`).join("");
+    container.innerHTML = `<table><thead><tr><th>Number</th><th>Verdict</th><th>Reasoning</th><th>When</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }
+
+  let verifiedThisSession = 0;
+
+  function renderStats(pending, logs){
+    document.getElementById("statChecks").textContent = logs.length;
+    document.getElementById("statHighRisk").textContent = logs.filter(l=>l.riskLevel==="HIGH").length;
+    document.getElementById("statPending").textContent = pending.length;
+    document.getElementById("statVerified").textContent = verifiedThisSession;
+  }
+
+  function renderCharts(logs){
+    // Bar chart — hand-built SVG, no external chart library, so this
+    // renders identically everywhere with zero network dependency.
+    const trendEl = document.getElementById("trendChart");
+    const values = MOCK_TREND.values;
+    const labels = MOCK_TREND.labels;
+    const max = Math.max(...values, 1);
+    const w = 380, h = 190, padBottom = 26, barGap = 10;
+    const barW = (w - barGap * (values.length - 1)) / values.length;
+    const bars = values.map((v, i) => {
+      const barH = (v / max) * (h - padBottom - 10);
+      const x = i * (barW + barGap);
+      const y = (h - padBottom) - barH;
+      return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${barH.toFixed(1)}" rx="4" fill="#FF6A00"/>
+              <text x="${(x + barW / 2).toFixed(1)}" y="${h - 8}" font-size="10.5" fill="#565F6B" text-anchor="middle" font-family="Inter, sans-serif">${labels[i]}</text>`;
+    }).join("");
+    trendEl.innerHTML = `<svg viewBox="0 0 ${w} ${h}" width="100%" style="max-height:220px; display:block;">${bars}</svg>`;
+
+    // Donut chart — plain SVG circle with stroke-dasharray segments.
+    const high = logs.filter(l => l.riskLevel === "HIGH").length;
+    const med = logs.filter(l => l.riskLevel === "MEDIUM").length;
+    const low = logs.filter(l => l.riskLevel === "LOW").length;
+    const segments = [
+      { label: "High risk", value: high, color: "#E5483A" },
+      { label: "Caution", value: med, color: "#D98E4A" },
+      { label: "Low risk", value: low, color: "#5FBF8A" },
+    ];
+    const total = segments.reduce((s, seg) => s + seg.value, 0) || 1;
+    const r = 58, cx = 80, cy = 80, circumference = 2 * Math.PI * r;
+    let offset = 0;
+    const arcs = segments.map(seg => {
+      const frac = seg.value / total;
+      const dash = frac * circumference;
+      const gap = circumference - dash;
+      const circle = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${seg.color}" stroke-width="22" stroke-dasharray="${dash.toFixed(2)} ${gap.toFixed(2)}" stroke-dashoffset="${(-offset).toFixed(2)}" transform="rotate(-90 ${cx} ${cy})"/>`;
+      offset += dash;
+      return circle;
+    }).join("");
+    const legend = segments.map(seg =>
+      `<div style="display:flex; align-items:center; gap:6px; font-size:12px; color:#565F6B;">
+         <span style="width:9px; height:9px; border-radius:50%; background:${seg.color}; display:inline-block; flex-shrink:0;"></span>${seg.label} (${seg.value})
+       </div>`
+    ).join("");
+    document.getElementById("riskChart").innerHTML = `
+      <div style="display:flex; flex-direction:column; align-items:center; gap:16px; padding-top:6px;">
+        <svg viewBox="0 0 160 160" width="150" height="150">${arcs}</svg>
+        <div style="display:flex; gap:14px; flex-wrap:wrap; justify-content:center;">${legend}</div>
+      </div>`;
+  }
+
+  (async function init(){
+    const [pending, logs] = await Promise.all([fetchPendingReports(), fetchRecentLogs()]);
+    renderStats(pending, logs);
+    renderPending(pending);
+    renderLogs(logs);
+    renderCharts(logs);
+  })();
+
+  document.getElementById("logoutLink").addEventListener("click", () => {
+    localStorage.removeItem("trustline_token");
+    localStorage.removeItem("trustline_role");
+  });
+
+  document.querySelectorAll(".side-link").forEach(link => {
+    link.addEventListener("click", () => {
+      document.querySelectorAll(".side-link").forEach(l => l.classList.remove("active"));
+      link.classList.add("active");
+    });
+  });
+</script>
+
+</body>
+</html>

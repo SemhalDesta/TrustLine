@@ -10,11 +10,13 @@
 
 const env = require("../config/env");
 
+// Any of these mean "not a real, usable Twilio credential" — checking the
+// actual required shape (real SIDs always start with "AC") is more robust
+// than trying to guess every possible placeholder string someone might type.
 const USE_MOCK =
   !env.twilio.accountSid ||
   !env.twilio.authToken ||
-  env.twilio.accountSid === "replace_me" ||
-  env.twilio.authToken === "replace_me";
+  !env.twilio.accountSid.startsWith("AC");
 
 let twilioClient = null;
 if (!USE_MOCK) {

@@ -5,6 +5,7 @@ const verifyRoutes = require("./routes/verify");
 const ngoRoutes = require("./routes/ngo");
 const platformRoutes = require("./routes/platform");
 const smsRoutes = require("./routes/sms");
+const authRoutes = require("./routes/auth");
 
 function createApp() {
   const app = express();
@@ -19,6 +20,7 @@ function createApp() {
   app.use("/api/ngo", ngoRoutes);
   app.use("/api/platform", platformRoutes);
   app.use("/api/sms", smsRoutes);
+  app.use("/api/auth", authRoutes);
 
   // eslint-disable-next-line no-unused-vars
   app.use((err, req, res, next) => {

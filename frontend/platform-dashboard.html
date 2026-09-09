@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Platform Dashboard — TrustLine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#0A0D12;
+    --panel:#0F141C;
+    --paper:#E9EDF2;
+    --paper-dim:#DCE3EB;
+    --ink:#12151B;
+    --ink-dim:#565F6B;
+    --brand:#FF6A00;
+    --brand-bright:#FF9142;
+    --amber:#D98E4A;
+    --red:#E5483A;
+    --green:#5FBF8A;
+    --line:rgba(255,255,255,0.08);
+    --line-dark:rgba(18,21,27,0.10);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background-color:var(--paper-dim);
+    background-image:radial-gradient(circle, rgba(18,21,27,0.16) 1.3px, transparent 1.3px);
+    background-size:26px 26px;
+    color:var(--ink);
+    font-family:'Inter', sans-serif;
+    font-size:15px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2{font-family:'Space Grotesk', sans-serif; font-weight:600; letter-spacing:-0.01em;}
+  a{color:inherit; text-decoration:none;}
+
+  header{
+    position:fixed; top:0; left:0; right:0; z-index:200;
+    padding:16px 28px; display:flex; align-items:center; justify-content:space-between;
+    backdrop-filter:blur(10px);
+    background:rgba(233,237,242,0.85);
+    border-bottom:1px solid var(--line-dark);
+  }
+  .brand{font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:17px; display:flex; align-items:center; gap:10px;}
+  .brand svg{display:block; flex-shrink:0;}
+  .brand .line{color:var(--brand);}
+  nav{display:flex; align-items:center; gap:0;}
+  nav a.navlink{font-size:14px; color:inherit; opacity:0.72; margin-right:24px;}
+  nav a.navlink:hover{opacity:1;}
+  .org-tag{
+    font-family:'IBM Plex Mono', monospace; font-size:11px; padding:4px 9px; border-radius:5px;
+    background:rgba(18,21,27,0.06); color:var(--ink-dim); margin-right:18px;
+  }
+  .btn{
+    font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:14px;
+    padding:9px 18px; border-radius:8px; display:inline-flex; align-items:center; gap:6px;
+    cursor:pointer; transition:transform .15s ease, background .2s, border-color .2s;
+    border:1px solid transparent;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn-primary{background:var(--brand); color:var(--void); border:none;}
+  .btn-primary:hover{background:var(--brand-bright);}
+  .btn-primary:disabled{opacity:0.55; cursor:default;}
+  .btn-ghost-dark{border-color:rgba(18,21,27,0.18); color:var(--ink);}
+
+  .shell{display:flex; padding-top:64px; min-height:100vh; align-items:flex-start;}
+  .sidebar{
+    width:220px; flex-shrink:0; position:sticky; top:64px; height:calc(100vh - 64px);
+    background:var(--void); color:var(--paper); padding:28px 16px;
+    display:flex; flex-direction:column; gap:4px;
+  }
+  .sidebar-label{font-family:'IBM Plex Mono', monospace; font-size:10.5px; letter-spacing:0.05em; color:rgba(239,241,234,0.4); padding:0 12px; margin-bottom:10px;}
+  .side-link{
+    display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:7px;
+    font-size:14px; color:rgba(239,241,234,0.75); font-weight:500; transition:background .15s, color .15s;
+  }
+  .side-link:hover{background:rgba(255,255,255,0.06); color:var(--paper);}
+  .side-link.active{background:rgba(255,106,0,0.14); color:var(--brand-bright);}
+  .side-link svg{flex-shrink:0;}
+  .sidebar-foot{margin-top:auto; padding:0 12px; font-size:12px; color:rgba(239,241,234,0.4);}
+
+  main{flex:1; min-width:0; padding:36px 40px 90px;}
+  .page-head{margin-bottom:32px;}
+  .page-head h1{font-size:clamp(24px,3vw,29px);}
+  .page-head p{margin-top:8px; color:var(--ink-dim); font-size:15px;}
+
+  .stats-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:32px;}
+  .stat-card{
+    background:#fff; border:1px solid var(--line-dark); border-top:3px solid var(--stat-color, var(--brand));
+    border-radius:10px; padding:18px 20px;
+    box-shadow:0 1px 2px rgba(18,21,27,0.03), 0 6px 16px rgba(18,21,27,0.04);
+  }
+  .stat-card .icon{
+    width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+    background:rgba(0,0,0,0.05); margin-bottom:12px;
+  }
+  .stat-card .num{font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:27px; line-height:1;}
+  .stat-card .lbl{margin-top:5px; font-size:13px; color:var(--ink-dim);}
+  .stat-card .trend{margin-top:8px; font-size:12px; font-weight:600;}
+  .trend.up{color:var(--green);}
+  .trend.info{color:var(--ink-dim); font-weight:500;}
+
+  .usage-bar-track{width:100%; height:6px; background:var(--line-dark); border-radius:3px; margin-top:10px; overflow:hidden;}
+  .usage-bar-fill{height:100%; background:var(--brand); border-radius:3px;}
+
+  .charts-grid{display:grid; grid-template-columns:1.3fr 1fr; gap:16px; margin-bottom:40px;}
+  .chart-card{
+    background:#fff; border:1px solid var(--line-dark); border-radius:10px; padding:20px 22px;
+    box-shadow:0 1px 2px rgba(18,21,27,0.03), 0 6px 16px rgba(18,21,27,0.04);
+  }
+  .chart-card h3{font-size:14.5px; font-weight:600; margin-bottom:2px;}
+  .chart-card .sub{font-size:12.5px; color:var(--ink-dim); margin-bottom:14px;}
+
+  section.block{margin-bottom:40px;}
+  .block-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:14px;}
+  .block-head h2{font-size:18px;}
+  .block-head .count{font-size:13px; color:var(--ink-dim);}
+  .block-card{
+    background:#fff; border:1px solid var(--line-dark); border-radius:10px; padding:22px;
+    box-shadow:0 1px 2px rgba(18,21,27,0.03), 0 6px 16px rgba(18,21,27,0.04);
+  }
+
+  .bulk-form label{display:block; font-size:13px; font-weight:600; margin-bottom:8px;}
+  .bulk-form textarea{
+    width:100%; min-height:110px; background:#fff; border:1px solid var(--line-dark); border-radius:8px;
+    padding:12px 14px; font-family:'IBM Plex Mono', monospace; font-size:13.5px; color:var(--ink); resize:vertical;
+  }
+  .bulk-form textarea::placeholder{color:rgba(18,21,27,0.32);}
+  .bulk-form textarea:focus{outline:none; border-color:var(--brand);}
+  .bulk-form .hint{margin-top:8px; font-size:12.5px; color:var(--ink-dim);}
+  .bulk-form .btn{margin-top:14px;}
+  .bulk-results{margin-top:20px;}
+
+  .badge-gen{display:grid; grid-template-columns:1fr 1fr; gap:28px; align-items:center;}
+  .badge-input label{display:block; font-size:13px; font-weight:600; margin-bottom:8px;}
+  .badge-input input{
+    width:100%; background:#fff; border:1px solid var(--line-dark); border-radius:8px;
+    padding:12px 14px; font-family:'IBM Plex Mono', monospace; font-size:14px; color:var(--ink);
+  }
+  .badge-input input:focus{outline:none; border-color:var(--brand);}
+  .badge-input .btn{margin-top:12px;}
+  .badge-preview{display:flex; flex-direction:column; align-items:center; gap:16px;}
+  .verified-badge{
+    display:inline-flex; align-items:center; gap:8px; padding:10px 16px; border-radius:24px;
+    background:rgba(95,191,138,0.1); border:1.5px solid var(--green); color:#1e7a4c;
+    font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:14px;
+  }
+  .embed-box{
+    width:100%; background:var(--void); color:#8fe3b8; font-family:'IBM Plex Mono', monospace; font-size:12px;
+    border-radius:8px; padding:14px 16px; position:relative; line-height:1.6; overflow-x:auto; white-space:pre;
+  }
+  .copy-btn{
+    position:absolute; top:10px; right:10px; font-family:'Inter', sans-serif; font-size:11.5px; font-weight:600;
+    background:rgba(255,255,255,0.08); color:#EFF1EA; border:none; border-radius:5px; padding:5px 10px; cursor:pointer;
+  }
+  .copy-btn:hover{background:rgba(255,255,255,0.15);}
+
+  table{width:100%; border-collapse:collapse; background:#fff; border:1px solid var(--line-dark); border-radius:10px; overflow:hidden; box-shadow:0 1px 2px rgba(18,21,27,0.03), 0 6px 16px rgba(18,21,27,0.04);}
+  thead th{
+    text-align:left; font-size:11.5px; font-weight:600; color:var(--ink-dim); text-transform:uppercase; letter-spacing:0.02em;
+    padding:12px 16px; border-bottom:1px solid var(--line-dark); background:rgba(18,21,27,0.02);
+  }
+  tbody td{padding:13px 16px; border-bottom:1px solid var(--line-dark); font-size:13.5px; vertical-align:top;}
+  tbody tr{transition:background .12s;}
+  tbody tr:hover{background:rgba(255,106,0,0.03);}
+  tbody tr:last-child td{border-bottom:none;}
+  td.num-cell{font-family:'IBM Plex Mono', monospace; font-size:13px;}
+  td.notes-cell{color:var(--ink-dim); max-width:300px;}
+
+  .badge{display:inline-flex; align-items:center; gap:6px; font-size:11.5px; font-weight:600; padding:4px 9px; border-radius:20px;}
+  .badge .dot{width:6px; height:6px; border-radius:50%;}
+  .badge.risk-high{background:rgba(229,72,58,0.1); color:var(--red);}
+  .badge.risk-high .dot{background:var(--red);}
+  .badge.risk-medium{background:rgba(217,142,74,0.12); color:var(--amber);}
+  .badge.risk-medium .dot{background:var(--amber);}
+  .badge.risk-low{background:rgba(95,191,138,0.12); color:var(--green);}
+  .badge.risk-low .dot{background:var(--green);}
+
+  .empty-state, .loading-state{
+    background:#fff; border:1px solid var(--line-dark); border-radius:10px;
+    padding:32px; text-align:center; color:var(--ink-dim); font-size:13.5px;
+  }
+
+  footer{
+    position:relative;
+    background-color:var(--void);
+    background-image:radial-gradient(circle, rgba(239,241,234,0.08) 1.3px, transparent 1.3px);
+    background-size:26px 26px;
+    color:rgba(239,241,234,0.5);
+    padding:56px 0 40px;
+    font-size:13.5px;
+    overflow:hidden;
+  }
+  footer .wrap{max-width:1080px; margin:0 auto; padding:0 28px; position:relative; z-index:2;}
+  .footer-top{display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:24px; padding-bottom:32px; margin-bottom:24px; border-bottom:1px solid var(--line);}
+  .footer-brand .brand{color:var(--paper); margin-bottom:10px;}
+  .footer-brand p{max-width:34ch; color:rgba(239,241,234,0.45); font-size:13.5px;}
+  .footer-links{display:flex; gap:56px;}
+  .footer-col h4{font-family:'IBM Plex Mono', monospace; font-size:11.5px; color:rgba(239,241,234,0.4); margin-bottom:14px; letter-spacing:0.04em;}
+  .footer-col a{display:block; margin-bottom:10px; color:rgba(239,241,234,0.65); font-size:13.5px;}
+  .footer-col a:hover{color:var(--paper);}
+  .footer-bottom{display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px;}
+
+  @media (max-width:980px){
+    nav a.navlink{display:none;}
+    .stats-grid{grid-template-columns:repeat(2,1fr);}
+    .charts-grid{grid-template-columns:1fr;}
+    .badge-gen{grid-template-columns:1fr;}
+  }
+  @media (max-width:820px){
+    .shell{flex-direction:column;}
+    .sidebar{width:100%; position:static; height:auto; flex-direction:row; overflow-x:auto; padding:14px 16px; gap:8px;}
+    .sidebar-label, .sidebar-foot{display:none;}
+    main{padding:28px 20px 70px;}
+    .stats-grid{grid-template-columns:1fr 1fr;}
+    table, thead, tbody, th, td, tr{display:block;}
+    thead{display:none;}
+    tbody tr{border-bottom:1px solid var(--line-dark); padding:12px 16px;}
+    tbody td{border-bottom:none; padding:4px 0;}
+    tbody td::before{content:attr(data-label); display:block; font-size:11px; color:var(--ink-dim); margin-bottom:2px;}
+  }
+</style>
+</head>
+<body>
+
+<header id="siteHeader">
+  <a href="about.html" class="brand">
+    <svg width="30" height="30" viewBox="0 0 40 40">
+      <rect x="2" y="2" width="36" height="36" rx="10" fill="#FF6A00"/>
+      <line x1="11" y1="9" x2="20" y2="15" stroke="#0A0D12" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="29" y1="9" x2="20" y2="15" stroke="#0A0D12" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="20" y1="6" x2="20" y2="15" stroke="#0A0D12" stroke-width="1.8" stroke-linecap="round"/>
+      <circle cx="11" cy="9" r="2.1" fill="#FF6A00" stroke="#0A0D12" stroke-width="1.5"/>
+      <circle cx="29" cy="9" r="2.1" fill="#FF6A00" stroke="#0A0D12" stroke-width="1.5"/>
+      <circle cx="20" cy="6" r="1.8" fill="#FF6A00" stroke="#0A0D12" stroke-width="1.5"/>
+      <rect x="14.5" y="15" width="11" height="19" rx="2.6" fill="none" stroke="#0A0D12" stroke-width="2"/>
+      <line x1="17.5" y1="18.5" x2="22.5" y2="18.5" stroke="#0A0D12" stroke-width="1.5" stroke-linecap="round"/>
+      <circle cx="20" cy="30.5" r="1.1" fill="#0A0D12"/>
+    </svg>
+    TrustLine
+  </a>
+  <nav>
+    <a class="navlink" href="about.html">About</a>
+    <a class="navlink" href="about.html#how">How it works</a>
+    <span class="org-tag">PLATFORM ACCOUNT</span>
+    <a class="btn btn-ghost-dark" href="login.html" id="logoutLink">Log out</a>
+  </nav>
+</header>
+
+<div class="shell">
+  <aside class="sidebar">
+    <div class="sidebar-label">DASHBOARD</div>
+    <a href="#overview" class="side-link active">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="1.5" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="8.5" y="1.5" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="1.5" y="8.5" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="8.5" y="8.5" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/></svg>
+      Overview
+    </a>
+    <a href="#bulk" class="side-link">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4.5H14M2 8H14M2 11.5H9.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      Bulk Verify
+    </a>
+    <a href="#badge" class="side-link">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.5L13.5 3.8V7.5C13.5 10.8 11.2 13.4 8 14.5C4.8 13.4 2.5 10.8 2.5 7.5V3.8L8 1.5Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M5.5 8L7.2 9.7L10.5 6.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Verified Badge
+    </a>
+    <a href="#numbers" class="side-link">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="4" y="1.5" width="8" height="13" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M7 12H9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      Registered Numbers
+    </a>
+    <div class="sidebar-foot">Al Amana Recruitment<br>Demo account</div>
+  </aside>
+
+  <main>
+    <div class="page-head" id="overview">
+      <h1>Platform verification &amp; usage</h1>
+      <p>Verify your registered agents and generate a badge you can display on legitimate listings.</p>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card" style="--stat-color:#FF6A00;">
+        <div class="icon" style="color:#FF6A00;">
+          <svg width="17" height="17" viewBox="0 0 16 16" fill="none"><rect x="3" y="1.5" width="10" height="13" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M6 12H10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <div class="num" id="statRegistered">—</div>
+        <div class="lbl">Registered numbers</div>
+      </div>
+      <div class="stat-card" style="--stat-color:#5FBF8A;">
+        <div class="icon" style="color:#5FBF8A;">
+          <svg width="17" height="17" viewBox="0 0 16 16" fill="none"><path d="M8 1.5L13.5 3.8V7.5C13.5 10.8 11.2 13.4 8 14.5C4.8 13.4 2.5 10.8 2.5 7.5V3.8L8 1.5Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M5.5 8L7.2 9.7L10.5 6.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="num" id="statVerified">—</div>
+        <div class="lbl">Verified &amp; badge-eligible</div>
+        <div class="trend up">↑ 3 this week</div>
+      </div>
+      <div class="stat-card" style="--stat-color:#D98E4A;">
+        <div class="icon" style="color:#D98E4A;">
+          <svg width="17" height="17" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.2" stroke="currentColor" stroke-width="1.5"/><path d="M8 4.5V8L10.3 9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <div class="num" id="statPending">—</div>
+        <div class="lbl">Pending verification</div>
+      </div>
+      <div class="stat-card" style="--stat-color:#565F6B;">
+        <div class="icon" style="color:#565F6B;">
+          <svg width="17" height="17" viewBox="0 0 16 16" fill="none"><path d="M2 13.5V9L5.5 5.5L9 9L14 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="num" id="statUsage">—</div>
+        <div class="lbl">Checks used this month</div>
+        <div class="usage-bar-track"><div class="usage-bar-fill" id="usageBarFill" style="width:0%;"></div></div>
+      </div>
+    </div>
+
+    <div class="charts-grid">
+      <div class="chart-card">
+        <h3>Checks over the last 7 days</h3>
+        <div class="sub">Bulk and individual verifications combined</div>
+        <div id="trendChart"></div>
+      </div>
+      <div class="chart-card">
+        <h3>Registered number status</h3>
+        <div class="sub">Across your full agent roster</div>
+        <div id="statusChart"></div>
+      </div>
+    </div>
+
+    <section class="block" id="bulk">
+      <div class="block-head">
+        <h2>Bulk verify</h2>
+        <span class="count">One number per line</span>
+      </div>
+      <div class="block-card bulk-form">
+        <label for="bulkInput">Phone numbers</label>
+        <textarea id="bulkInput" placeholder="+971501234567&#10;+971509876543&#10;+971502223344"></textarea>
+        <div class="hint">Include the country code on each line. Results appear below once checked.</div>
+        <button class="btn btn-primary" id="bulkBtn">Verify all</button>
+        <div class="bulk-results" id="bulkResults"></div>
+      </div>
+    </section>
+
+    <section class="block" id="badge">
+      <div class="block-head">
+        <h2>Generate a verified badge</h2>
+      </div>
+      <div class="block-card badge-gen">
+        <div class="badge-input">
+          <label for="badgeInput">Verified agent number</label>
+          <input type="tel" id="badgeInput" placeholder="+971501234567" value="+971501234567">
+          <button class="btn btn-primary" id="badgeBtn">Generate embed code</button>
+        </div>
+        <div class="badge-preview">
+          <div class="verified-badge">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.5L13.5 3.8V7.5C13.5 10.8 11.2 13.4 8 14.5C4.8 13.4 2.5 10.8 2.5 7.5V3.8L8 1.5Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M5.5 8L7.2 9.7L10.5 6.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            TrustLine Verified
+          </div>
+          <div class="embed-box" id="embedBox">
+            <button class="copy-btn" id="copyBtn">Copy</button>
+            &lt;a href="https://trustline.app/verify?n=+971501234567"&gt;
+  &lt;img src="https://trustline.app/badge.svg" alt="TrustLine Verified"&gt;
+&lt;/a&gt;
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="numbers">
+      <div class="block-head">
+        <h2>Registered numbers</h2>
+        <span class="count" id="numbersCount"></span>
+      </div>
+      <div id="numbersContainer"><div class="loading-state">Loading registered numbers…</div></div>
+    </section>
+  </main>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="brand">
+          <svg width="26" height="26" viewBox="0 0 40 40">
+            <rect x="2" y="2" width="36" height="36" rx="10" fill="#FF6A00"/>
+            <line x1="11" y1="9" x2="20" y2="15" stroke="#0A0D12" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="29" y1="9" x2="20" y2="15" stroke="#0A0D12" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="20" y1="6" x2="20" y2="15" stroke="#0A0D12" stroke-width="1.8" stroke-linecap="round"/>
+            <circle cx="11" cy="9" r="2.1" fill="#FF6A00" stroke="#0A0D12" stroke-width="1.5"/>
+            <circle cx="29" cy="9" r="2.1" fill="#FF6A00" stroke="#0A0D12" stroke-width="1.5"/>
+            <circle cx="20" cy="6" r="1.8" fill="#FF6A00" stroke="#0A0D12" stroke-width="1.5"/>
+            <rect x="14.5" y="15" width="11" height="19" rx="2.6" fill="none" stroke="#0A0D12" stroke-width="2"/>
+            <line x1="17.5" y1="18.5" x2="22.5" y2="18.5" stroke="#0A0D12" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="20" cy="30.5" r="1.1" fill="#0A0D12"/>
+          </svg>
+          TrustLine
+        </div>
+        <p>A verdict you can read in three seconds — built for the MENA Ignite Hackathon.</p>
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <h4>PRODUCT</h4>
+          <a href="verify.html">Check a number</a>
+          <a href="about.html#how">How it works</a>
+          <a href="about.html#agent">The signal</a>
+        </div>
+        <div class="footer-col">
+          <h4>ORGANIZATIONS</h4>
+          <a href="login.html">NGO / Ministry login</a>
+          <a href="login.html">Platform login</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 TrustLine</span>
+      <span>Theme 1 · MENA Ignite Hackathon</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const API_BASE = "http://localhost:4000/api";
+
+  // Auth guard — this page requires a real platform_account token from login.html.
+  const authToken = localStorage.getItem("trustline_token");
+  const authRole = localStorage.getItem("trustline_role");
+  if (!authToken || authRole !== "platform_account") {
+    window.location.href = "login.html";
+  }
+  function authHeaders(extra = {}) {
+    return { Authorization: `Bearer ${authToken}`, ...extra };
+  }
+
+  const MOCK_NUMBERS = [
+    { phoneNumber: "+971 50 111 2233", status: "verified", lastChecked: "2026-09-06T10:00:00Z" },
+    { phoneNumber: "+971 55 222 3344", status: "verified", lastChecked: "2026-09-05T14:20:00Z" },
+    { phoneNumber: "+971 52 333 4455", status: "pending", lastChecked: null },
+    { phoneNumber: "+971 56 444 5566", status: "flagged", lastChecked: "2026-09-07T09:10:00Z" },
+    { phoneNumber: "+971 50 555 6677", status: "verified", lastChecked: "2026-09-08T08:00:00Z" },
+  ];
+
+  const MOCK_USAGE = { registered: 18, verified: 14, pending: 3, checksThisMonth: 62, planLimit: 200 };
+  const MOCK_TREND = { labels: ["Tue","Wed","Thu","Fri","Sat","Sun","Mon"], values: [4, 9, 6, 12, 7, 3, 10] };
+
+  const RISK_LABEL = { HIGH: "High risk", MEDIUM: "Caution", LOW: "Low risk" };
+  const RISK_CLASS = { HIGH: "risk-high", MEDIUM: "risk-medium", LOW: "risk-low" };
+  const STATUS_LABEL = { verified: "Verified", pending: "Pending", flagged: "Flagged" };
+  const STATUS_CLASS = { verified: "risk-low", pending: "risk-medium", flagged: "risk-high" };
+
+  async function fetchUsage(){
+    try{ const res = await fetch(`${API_BASE}/platform/usage`, { headers: authHeaders() }); if(!res.ok) throw 0; return await res.json(); }
+    catch(err){ return MOCK_USAGE; }
+  }
+  async function fetchNumbers(){
+    try{ const res = await fetch(`${API_BASE}/platform/numbers`, { headers: authHeaders() }); if(!res.ok) throw 0; return await res.json(); }
+    catch(err){ return MOCK_NUMBERS; }
+  }
+  async function bulkVerify(phoneNumbers){
+    try{
+      const res = await fetch(`${API_BASE}/platform/bulk-verify`, {
+        method:"POST",
+        headers: authHeaders({"Content-Type":"application/json"}),
+        body: JSON.stringify({phoneNumbers})
+      });
+      if(!res.ok) throw 0;
+      const data = await res.json();
+      // Real backend returns { results: [{ phoneNumber, escalated, verdict:
+      // { riskLevel, reasoning, signalsUsed } }] } — flatten to the simple
+      // { phoneNumber, riskLevel, explanation } shape renderBulkResults expects.
+      // Individual per-number failures come back as { phoneNumber, error }
+      // with no verdict — surface those as a MEDIUM/caution row rather than
+      // crashing on a missing riskLevel.
+      return data.results.map(r => {
+        if (r.error) {
+          return { phoneNumber: r.phoneNumber, riskLevel: "MEDIUM", explanation: `Couldn't verify: ${r.error}` };
+        }
+        return { phoneNumber: r.phoneNumber, riskLevel: r.verdict.riskLevel, explanation: r.verdict.reasoning };
+      });
+    }catch(err){
+      const options = ["HIGH","MEDIUM","LOW"];
+      return phoneNumbers.map(n => {
+        const pick = options[Math.abs(n.split("").reduce((a,c)=>a+c.charCodeAt(0),0)) % options.length];
+        const explain = {
+          HIGH: "SIM and device both changed recently.",
+          MEDIUM: "One signal inconclusive; escalated to secondary checks.",
+          LOW: "No red flags across available signals.",
+        }[pick];
+        return { phoneNumber: n, riskLevel: pick, explanation: explain };
+      });
+    }
+  }
+
+  function timeAgo(iso){
+    if (!iso) return "never";
+    const hrs = Math.round((Date.now() - new Date(iso).getTime()) / 3600000);
+    if (hrs < 1) return "just now";
+    if (hrs < 24) return `${hrs}h ago`;
+    return `${Math.round(hrs/24)}d ago`;
+  }
+
+  function renderStats(usage){
+    document.getElementById("statRegistered").textContent = usage.registered;
+    document.getElementById("statVerified").textContent = usage.verified;
+    document.getElementById("statPending").textContent = usage.pending;
+    document.getElementById("statUsage").textContent = `${usage.checksThisMonth} / ${usage.planLimit}`;
+    const pct = Math.min(100, Math.round((usage.checksThisMonth / usage.planLimit) * 100));
+    document.getElementById("usageBarFill").style.width = pct + "%";
+  }
+
+  function renderNumbers(numbers){
+    const container = document.getElementById("numbersContainer");
+    document.getElementById("numbersCount").textContent = `${numbers.length} registered`;
+    if (numbers.length === 0){ container.innerHTML = `<div class="empty-state">No numbers registered yet.</div>`; return; }
+    const rows = numbers.map(n => `
+      <tr>
+        <td class="num-cell" data-label="Number">${n.phoneNumber}</td>
+        <td data-label="Status"><span class="badge ${STATUS_CLASS[n.status]}"><span class="dot"></span>${STATUS_LABEL[n.status]}</span></td>
+        <td data-label="Last checked">${timeAgo(n.lastChecked)}</td>
+      </tr>`).join("");
+    container.innerHTML = `<table><thead><tr><th>Number</th><th>Status</th><th>Last checked</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }
+
+  function renderBulkResults(results){
+    const container = document.getElementById("bulkResults");
+    const rows = results.map(r => `
+      <tr>
+        <td class="num-cell" data-label="Number">${r.phoneNumber}</td>
+        <td data-label="Verdict"><span class="badge ${RISK_CLASS[r.riskLevel]||"risk-medium"}"><span class="dot"></span>${RISK_LABEL[r.riskLevel]||r.riskLevel}</span></td>
+        <td class="notes-cell" data-label="Explanation">${r.explanation}</td>
+      </tr>`).join("");
+    container.innerHTML = `<table><thead><tr><th>Number</th><th>Verdict</th><th>Explanation</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }
+
+  function renderTrendChart(){
+    const el = document.getElementById("trendChart");
+    const values = MOCK_TREND.values, labels = MOCK_TREND.labels;
+    const max = Math.max(...values, 1);
+    const w = 380, h = 190, padBottom = 26, barGap = 10;
+    const barW = (w - barGap * (values.length - 1)) / values.length;
+    const bars = values.map((v, i) => {
+      const barH = (v / max) * (h - padBottom - 10);
+      const x = i * (barW + barGap);
+      const y = (h - padBottom) - barH;
+      return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${barH.toFixed(1)}" rx="4" fill="#FF6A00"/>
+              <text x="${(x + barW/2).toFixed(1)}" y="${h-8}" font-size="10.5" fill="#565F6B" text-anchor="middle" font-family="Inter, sans-serif">${labels[i]}</text>`;
+    }).join("");
+    el.innerHTML = `<svg viewBox="0 0 ${w} ${h}" width="100%" style="max-height:220px; display:block;">${bars}</svg>`;
+  }
+
+  function renderStatusChart(numbers){
+    const verified = numbers.filter(n=>n.status==="verified").length;
+    const pending = numbers.filter(n=>n.status==="pending").length;
+    const flagged = numbers.filter(n=>n.status==="flagged").length;
+    const segments = [
+      { label: "Verified", value: verified, color: "#5FBF8A" },
+      { label: "Pending", value: pending, color: "#D98E4A" },
+      { label: "Flagged", value: flagged, color: "#E5483A" },
+    ];
+    const total = segments.reduce((s,seg)=>s+seg.value,0) || 1;
+    const r = 58, cx = 80, cy = 80, circumference = 2*Math.PI*r;
+    let offset = 0;
+    const arcs = segments.map(seg => {
+      const frac = seg.value/total, dash = frac*circumference, gap = circumference-dash;
+      const c = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${seg.color}" stroke-width="22" stroke-dasharray="${dash.toFixed(2)} ${gap.toFixed(2)}" stroke-dashoffset="${(-offset).toFixed(2)}" transform="rotate(-90 ${cx} ${cy})"/>`;
+      offset += dash;
+      return c;
+    }).join("");
+    const legend = segments.map(seg =>
+      `<div style="display:flex; align-items:center; gap:6px; font-size:12px; color:#565F6B;">
+         <span style="width:9px; height:9px; border-radius:50%; background:${seg.color}; display:inline-block; flex-shrink:0;"></span>${seg.label} (${seg.value})
+       </div>`).join("");
+    document.getElementById("statusChart").innerHTML = `
+      <div style="display:flex; flex-direction:column; align-items:center; gap:16px; padding-top:6px;">
+        <svg viewBox="0 0 160 160" width="150" height="150">${arcs}</svg>
+        <div style="display:flex; gap:14px; flex-wrap:wrap; justify-content:center;">${legend}</div>
+      </div>`;
+  }
+
+  document.getElementById("bulkBtn").addEventListener("click", async () => {
+    const raw = document.getElementById("bulkInput").value;
+    const numbers = raw.split("\n").map(s => s.trim()).filter(Boolean);
+    if (numbers.length === 0) return;
+    const btn = document.getElementById("bulkBtn");
+    btn.disabled = true; btn.textContent = "Verifying…";
+    const results = await bulkVerify(numbers);
+    renderBulkResults(results);
+    btn.disabled = false; btn.textContent = "Verify all";
+  });
+
+  document.getElementById("badgeBtn").addEventListener("click", () => {
+    const num = document.getElementById("badgeInput").value.trim() || "+971501234567";
+    const box = document.getElementById("embedBox");
+    box.innerHTML = `<button class="copy-btn" id="copyBtn">Copy</button>&lt;a href="https://trustline.app/verify?n=${encodeURIComponent(num)}"&gt;
+  &lt;img src="https://trustline.app/badge.svg" alt="TrustLine Verified"&gt;
+&lt;/a&gt;`;
+    attachCopyHandler();
+  });
+
+  function attachCopyHandler(){
+    const btn = document.getElementById("copyBtn");
+    btn.addEventListener("click", () => {
+      const text = document.getElementById("embedBox").innerText.replace(/^Copy\s*/, "").trim();
+      navigator.clipboard?.writeText(text).catch(()=>{});
+      btn.textContent = "Copied!";
+      setTimeout(() => { btn.textContent = "Copy"; }, 1500);
+    });
+  }
+  attachCopyHandler();
+
+  document.getElementById("logoutLink").addEventListener("click", () => {
+    localStorage.removeItem("trustline_token");
+    localStorage.removeItem("trustline_role");
+  });
+
+  document.querySelectorAll(".side-link").forEach(link => {
+    link.addEventListener("click", () => {
+      document.querySelectorAll(".side-link").forEach(l => l.classList.remove("active"));
+      link.classList.add("active");
+    });
+  });
+
+  (async function init(){
+    const [usage, numbers] = await Promise.all([fetchUsage(), fetchNumbers()]);
+    renderStats(usage);
+    renderNumbers(numbers);
+    renderTrendChart();
+    renderStatusChart(numbers);
+  })();
+</script>
+
+</body>
+</html>

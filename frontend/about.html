@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TrustLine — Know who's really on the other end of the line</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#0A0D12;
+    --panel:#0F141C;
+    --panel-2:#141B26;
+    --paper:#E9EDF2;
+    --paper-dim:#DCE3EB;
+    --ink:#12151B;
+    --ink-dim:#565F6B;
+    --brand:#FF6A00;
+    --brand-soft:rgba(255,106,0,0.35);
+    --brand-bright:#FF9142;
+    --amber:#D98E4A;
+    --red:#E5483A;
+    --green:#5FBF8A;
+    --line:rgba(255,255,255,0.08);
+    --line-dark:rgba(18,21,27,0.10);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter', sans-serif;
+    font-size:16px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  h1,h2,h3{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    letter-spacing:-0.01em;
+  }
+  .mono{font-family:'IBM Plex Mono', monospace;}
+  a{color:inherit; text-decoration:none;}
+  .wrap{
+    max-width:1080px;
+    margin:0 auto;
+    padding:0 28px;
+  }
+  .narrow{max-width:760px;}
+  .grain{
+    position:fixed; inset:0;
+    pointer-events:none;
+    z-index:999;
+    opacity:0.035;
+    mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .net-local{position:absolute; inset:0; width:100%; height:100%; display:block; pointer-events:none;}
+
+  .halo-dark{text-shadow:0 0 6px var(--void), 0 0 14px var(--void), 0 0 22px var(--void);}
+  .halo-panel{text-shadow:0 0 6px var(--panel), 0 0 14px var(--panel), 0 0 22px var(--panel);}
+
+  /* ---------- Nav ---------- */
+  header{
+    position:fixed; top:0; left:0; right:0;
+    z-index:100;
+    padding:16px 28px;
+    display:flex; align-items:center; justify-content:space-between;
+    backdrop-filter:blur(10px);
+    background:rgba(233,237,242,0.72);
+    border-bottom:1px solid var(--line-dark);
+    transition:background .3s, border-color .3s;
+  }
+  header.dark-mode{
+    background:rgba(10,13,18,0.62);
+    border-bottom:1px solid var(--line);
+    color:var(--paper);
+  }
+  .brand{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:17px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .brand svg{display:block; flex-shrink:0;}
+  .brand .line{color:var(--brand);}
+  nav{display:flex; align-items:center; gap:8px;}
+  nav a.navlink{font-size:14px; color:inherit; opacity:0.72; margin-right:20px;}
+  nav a.navlink:hover{opacity:1;}
+  .btn{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:14px;
+    padding:9px 18px;
+    border-radius:8px;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    cursor:pointer;
+    transition:transform .15s ease, background .2s, border-color .2s;
+    border:1px solid transparent;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn-primary{background:var(--brand); color:var(--void);}
+  .btn-primary:hover{background:var(--brand-bright);}
+  .btn-ghost-dark{border-color:rgba(18,21,27,0.18); color:var(--ink);}
+  .btn-ghost-dark:hover{border-color:rgba(18,21,27,0.4);}
+  .btn-ghost-light{border-color:rgba(239,241,234,0.25); color:var(--paper);}
+  .btn-ghost-light:hover{border-color:rgba(239,241,234,0.5);}
+
+  /* ---------- Hero ---------- */
+  section.hero{
+    position:relative;
+    min-height:92svh;
+    display:flex; flex-direction:column; justify-content:center;
+    background:var(--void);
+    color:var(--paper);
+    overflow:hidden;
+    padding-top:110px;
+    padding-bottom:70px;
+  }
+  .hero .wrap{position:relative; z-index:2;}
+  .eyebrow-route{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    color:var(--brand-bright);
+    display:flex; align-items:center; gap:8px;
+    margin-bottom:26px;
+    opacity:0.95;
+  }
+  .eyebrow-route .seg{opacity:0.5;}
+  h1.hero-h{
+    font-size:clamp(36px, 6vw, 58px);
+    line-height:1.06;
+    max-width:14ch;
+    color:var(--paper);
+  }
+  .hero p.sub{
+    margin-top:22px;
+    max-width:46ch;
+    font-size:17.5px;
+    color:rgba(239,241,234,0.68);
+  }
+  .hero-actions{
+    margin-top:38px;
+    display:flex;
+    align-items:center;
+    gap:18px;
+  }
+  .btn-lg{font-size:15.5px; padding:14px 26px;}
+  .hero-note{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:rgba(239,241,234,0.45);
+  }
+
+  /* ---------- How it works ---------- */
+  section.how{
+    position:relative;
+    background-color:var(--paper-dim);
+    background-image:radial-gradient(circle, rgba(18,21,27,0.16) 1.3px, transparent 1.3px);
+    background-size:26px 26px;
+    padding:110px 0 100px;
+    overflow:hidden;
+  }
+  .how .wrap{position:relative; z-index:2;}
+  .section-kicker{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    color:var(--ink-dim);
+    margin-bottom:14px;
+  }
+  h2.section-h{
+    font-size:clamp(26px,3.4vw,36px);
+    max-width:18ch;
+    margin-bottom:52px;
+  }
+  .steps{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:32px;
+  }
+  .step{
+    padding:24px 0 0;
+    border-top:1px solid var(--line-dark);
+  }
+  .step-mark{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    color:var(--brand);
+    margin-bottom:10px;
+    display:block;
+  }
+  .step h3{font-size:17px; margin-bottom:8px;}
+  .step p{color:var(--ink-dim); font-size:14.5px;}
+
+  /* ---------- AI agent dark section ---------- */
+  section.agent{
+    position:relative;
+    background-color:var(--void);
+    background-image:radial-gradient(circle, rgba(239,241,234,0.10) 1.3px, transparent 1.3px);
+    background-size:26px 26px;
+    color:var(--paper);
+    padding:70px 0 70px;
+    overflow:hidden;
+  }
+  .agent .wrap{position:relative; z-index:2;}
+  .agent-head{text-align:center; max-width:540px; margin:0 auto 36px;}
+  .agent-head h2{font-size:clamp(28px,4vw,40px); color:var(--paper);}
+  .agent-head p{margin-top:16px; color:rgba(239,241,234,0.6); font-size:16px;}
+
+  .converge{
+    position:relative;
+    max-width:640px;
+    margin:0 auto;
+    height:300px;
+  }
+  .signal-node{
+    position:absolute;
+    width:150px;
+    background:rgba(255,255,255,0.03);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:12px 14px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    color:rgba(239,241,234,0.75);
+  }
+  .signal-node .lab{color:rgba(239,241,234,0.4); font-size:10.5px; margin-bottom:4px;}
+  .signal-node.n1{top:0; left:0;}
+  .signal-node.n2{top:0; right:0;}
+  .signal-node.n3{bottom:38px; left:0;}
+  .signal-node.n4{bottom:38px; right:0;}
+  .core{
+    position:absolute;
+    top:50%; left:50%;
+    transform:translate(-50%,-50%);
+    width:98px; height:98px;
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #3a2412, #0c1017);
+    border:1px solid var(--brand-soft);
+    display:flex; align-items:center; justify-content:center;
+    text-align:center;
+    box-shadow:0 0 60px rgba(255,106,0,0.18);
+  }
+  .core span{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:13px;
+    color:var(--paper);
+    line-height:1.3;
+  }
+  .verdict-out{
+    position:absolute;
+    bottom:0; left:50%;
+    transform:translateX(-50%);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    color:var(--brand-bright);
+    text-align:center;
+  }
+  svg.converge-lines{position:absolute; inset:0; width:100%; height:100%;}
+  svg.converge-lines path{fill:none; stroke:var(--brand-soft); stroke-width:1;}
+  svg.converge-lines path.pulse{
+    stroke:var(--brand-bright);
+    stroke-width:1.4;
+    stroke-dasharray:6 10;
+    animation:dash 3s linear infinite;
+  }
+  @keyframes dash{to{stroke-dashoffset:-160;}}
+
+  /* ---------- Roles: real navigation, not decoration ---------- */
+  section.roles{
+    position:relative;
+    background-color:var(--paper-dim);
+    background-image:radial-gradient(circle, rgba(18,21,27,0.16) 1.3px, transparent 1.3px);
+    background-size:26px 26px;
+    padding:120px 0;
+    overflow:hidden;
+  }
+  .roles .wrap{position:relative; z-index:2;}
+  .roles h2{color:var(--ink); font-size:clamp(26px,3.6vw,36px); max-width:18ch; margin-bottom:14px;}
+  .roles > .wrap > p{color:var(--ink-dim); max-width:52ch; margin-bottom:52px; font-size:16px;}
+  .role-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line-dark); border-radius:14px; overflow:hidden;}
+  .role-card{
+    background:rgba(255,255,255,0.55);
+    padding:32px 28px;
+    position:relative; z-index:2;
+    display:flex; flex-direction:column;
+    transition:background .2s;
+  }
+  .role-card:hover{background:rgba(255,255,255,0.9);}
+  .role-card .num{font-family:'IBM Plex Mono', monospace; color:var(--brand); font-size:12.5px; margin-bottom:16px;}
+  .role-card h3{font-size:18px; margin-bottom:10px; color:var(--ink);}
+  .role-card p{font-size:14px; color:var(--ink-dim); margin-bottom:24px; flex:1;}
+  .role-card .go{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    color:var(--brand);
+    display:flex; align-items:center; gap:6px;
+  }
+  .role-card .go .arrow{transition:transform .15s;}
+  .role-card:hover .go .arrow{transform:translateX(3px);}
+
+  /* ---------- Footer ---------- */
+  footer{
+    position:relative;
+    background-color:var(--void);
+    background-image:radial-gradient(circle, rgba(239,241,234,0.08) 1.3px, transparent 1.3px);
+    background-size:26px 26px;
+    color:rgba(239,241,234,0.5);
+    padding:56px 0 40px;
+    font-size:13.5px;
+    overflow:hidden;
+  }
+  footer .wrap{position:relative; z-index:2;}
+  .footer-top{display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:24px; padding-bottom:32px; margin-bottom:24px; border-bottom:1px solid var(--line);}
+  .footer-brand .brand{color:var(--paper); margin-bottom:10px;}
+  .footer-brand p{max-width:34ch; color:rgba(239,241,234,0.45); font-size:13.5px;}
+  .footer-links{display:flex; gap:56px;}
+  .footer-col h4{font-family:'IBM Plex Mono', monospace; font-size:11.5px; color:rgba(239,241,234,0.4); margin-bottom:14px; letter-spacing:0.04em;}
+  .footer-col a{display:block; margin-bottom:10px; color:rgba(239,241,234,0.65); font-size:13.5px;}
+  .footer-col a:hover{color:var(--paper);}
+  .footer-bottom{display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px;}
+
+  @media (max-width:820px){
+    .steps{grid-template-columns:1fr;}
+    .role-grid{grid-template-columns:1fr;}
+    .footer-links{gap:32px;}
+    nav a.navlink{display:none;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
+    .net-local{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+
+<header id="siteHeader">
+  <a href="about.html" class="brand">
+    <svg width="30" height="30" viewBox="0 0 40 40">
+      <rect x="2" y="2" width="36" height="36" rx="10" fill="#FF6A00"/>
+      <line x1="11" y1="9" x2="20" y2="15" stroke="#0A0D12" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="29" y1="9" x2="20" y2="15" stroke="#0A0D12" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="20" y1="6" x2="20" y2="15" stroke="#0A0D12" stroke-width="1.8" stroke-linecap="round"/>
+      <circle cx="11" cy="9" r="2.1" fill="#FF6A00" stroke="#0A0D12" stroke-width="1.5"/>
+      <circle cx="29" cy="9" r="2.1" fill="#FF6A00" stroke="#0A0D12" stroke-width="1.5"/>
+      <circle cx="20" cy="6" r="1.8" fill="#FF6A00" stroke="#0A0D12" stroke-width="1.5"/>
+      <rect x="14.5" y="15" width="11" height="19" rx="2.6" fill="none" stroke="#0A0D12" stroke-width="2"/>
+      <line x1="17.5" y1="18.5" x2="22.5" y2="18.5" stroke="#0A0D12" stroke-width="1.5" stroke-linecap="round"/>
+      <circle cx="20" cy="30.5" r="1.1" fill="#0A0D12"/>
+    </svg>
+    TrustLine
+  </a>
+  <nav>
+    <a class="navlink" href="#how">How it works</a>
+    <a class="navlink" href="#agent">The signal</a>
+    <a class="navlink" href="login.html">Log in</a>
+    <a class="btn btn-primary" href="verify.html">Check a number</a>
+  </nav>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <canvas class="net-local"></canvas>
+  <div class="wrap">
+    <div class="eyebrow-route halo-dark">
+      <span>PHONE NUMBER</span><span class="seg">→</span><span>NETWORK</span><span class="seg">→</span><span>EVIDENCE</span><span class="seg">→</span><span>VERDICT</span>
+    </div>
+    <h1 class="hero-h halo-dark">Know who's really on the other end of the line.</h1>
+    <p class="sub halo-dark">TrustLine reads the signals a phone number leaves behind — SIM history, device status, scam reports — and turns them into one clear answer before you send money, share a document, or take the call.</p>
+    <div class="hero-actions">
+      <a href="verify.html" class="btn btn-primary btn-lg">Check a number</a>
+      <a href="login.html" class="btn btn-ghost-light btn-lg">For organizations</a>
+    </div>
+    <p class="hero-note halo-dark" style="margin-top:28px;">No account needed for workers · Free to check</p>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <div class="wrap">
+    <div class="section-kicker">HOW A VERDICT IS BUILT</div>
+    <h2 class="section-h">Three quiet signals, read together, say more than any one alone.</h2>
+    <div class="steps">
+      <div class="step">
+        <span class="step-mark mono">01</span>
+        <h3>Enter the number</h3>
+        <p>No account, no app install. Paste a number the way it was given to you.</p>
+      </div>
+      <div class="step">
+        <span class="step-mark mono">02</span>
+        <h3>We query the network directly</h3>
+        <p>TrustLine asks the carriers themselves whether the SIM has changed, whether the device is reachable, and whether the number has been reported before.</p>
+      </div>
+      <div class="step">
+        <span class="step-mark mono">03</span>
+        <h3>Get one plain verdict</h3>
+        <p>Low risk, caution, or high risk — with the specific reason underneath it, in under three seconds.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AI AGENT DARK SECTION -->
+<section class="agent" id="agent">
+  <div class="wrap">
+    <div class="agent-head">
+      <h2 class="halo-dark">Three signals. One decision.</h2>
+      <p class="halo-dark">Every check runs the same evidence through the same reasoning, so the same number gets the same answer no matter who's asking.</p>
+    </div>
+    <div class="converge">
+      <svg class="converge-lines" viewBox="0 0 640 300" preserveAspectRatio="none">
+        <path d="M 75 23 C 200 23, 260 105, 320 143" />
+        <path class="pulse" d="M 75 23 C 200 23, 260 105, 320 143" />
+        <path d="M 565 23 C 440 23, 380 105, 320 143" />
+        <path class="pulse" d="M 565 23 C 440 23, 380 105, 320 143" style="animation-delay:.6s"/>
+        <path d="M 75 218 C 200 218, 260 165, 320 150" />
+        <path class="pulse" d="M 75 218 C 200 218, 260 165, 320 150" style="animation-delay:1.2s"/>
+        <path d="M 565 218 C 440 218, 380 165, 320 150" />
+        <path class="pulse" d="M 565 218 C 440 218, 380 165, 320 150" style="animation-delay:1.8s"/>
+        <path d="M 320 191 L 320 285" />
+        <path class="pulse" d="M 320 191 L 320 285" style="animation-delay:2.2s"/>
+      </svg>
+      <div class="signal-node n1"><div class="lab">SIGNAL 01</div>SIM swap history</div>
+      <div class="signal-node n2"><div class="lab">SIGNAL 02</div>Device status</div>
+      <div class="signal-node n3"><div class="lab">SIGNAL 03</div>Location match</div>
+      <div class="signal-node n4"><div class="lab">SIGNAL 04</div>Scam reports</div>
+      <div class="core"><span>TRUSTLINE<br>AI</span></div>
+      <div class="verdict-out mono">CLEAR VERDICT</div>
+    </div>
+  </div>
+</section>
+
+<!-- ROLES — real navigation -->
+<section class="roles" id="orgs">
+  <div class="wrap">
+    <h2>Built for three different jobs, one shared verdict.</h2>
+    <p>Pick the one that's you — each has its own tools, not a shared inbox.</p>
+    <div class="role-grid">
+      <a class="role-card" href="verify.html">
+        <div class="num mono">FOR WORKERS</div>
+        <h3>Check a recruiter's number</h3>
+        <p>Verify a number before you pay a fee or travel — free, no account, works over SMS too.</p>
+        <div class="go">Check a number <span class="arrow">→</span></div>
+      </a>
+      <a class="role-card" href="login.html">
+        <div class="num mono">FOR NGOs &amp; MINISTRIES</div>
+        <h3>Review scam reports</h3>
+        <p>Verify worker-submitted reports, track fraud patterns by corridor, and export data for policy work.</p>
+        <div class="go">Log in to dashboard <span class="arrow">→</span></div>
+      </a>
+      <a class="role-card" href="login.html">
+        <div class="num mono">FOR RECRUITMENT PLATFORMS</div>
+        <h3>Verify your own agents</h3>
+        <p>Bulk-check your registered numbers and generate a "TrustLine Verified" badge for legitimate listings.</p>
+        <div class="go">Log in to dashboard <span class="arrow">→</span></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="brand">
+          <svg width="26" height="26" viewBox="0 0 40 40">
+            <rect x="2" y="2" width="36" height="36" rx="10" fill="#FF6A00"/>
+            <line x1="11" y1="9" x2="20" y2="15" stroke="#0A0D12" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="29" y1="9" x2="20" y2="15" stroke="#0A0D12" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="20" y1="6" x2="20" y2="15" stroke="#0A0D12" stroke-width="1.8" stroke-linecap="round"/>
+            <circle cx="11" cy="9" r="2.1" fill="#FF6A00" stroke="#0A0D12" stroke-width="1.5"/>
+            <circle cx="29" cy="9" r="2.1" fill="#FF6A00" stroke="#0A0D12" stroke-width="1.5"/>
+            <circle cx="20" cy="6" r="1.8" fill="#FF6A00" stroke="#0A0D12" stroke-width="1.5"/>
+            <rect x="14.5" y="15" width="11" height="19" rx="2.6" fill="none" stroke="#0A0D12" stroke-width="2"/>
+            <line x1="17.5" y1="18.5" x2="22.5" y2="18.5" stroke="#0A0D12" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="20" cy="30.5" r="1.1" fill="#0A0D12"/>
+          </svg>
+          TrustLine
+        </div>
+        <p>A verdict you can read in three seconds — built for the MENA Ignite Hackathon.</p>
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <h4>PRODUCT</h4>
+          <a href="verify.html">Check a number</a>
+          <a href="#how">How it works</a>
+          <a href="#agent">The signal</a>
+        </div>
+        <div class="footer-col">
+          <h4>ORGANIZATIONS</h4>
+          <a href="login.html">NGO / Ministry login</a>
+          <a href="login.html">Platform login</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 TrustLine</span>
+      <span>Theme 1 · MENA Ignite Hackathon</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const header = document.getElementById('siteHeader');
+  const darkSections = [document.querySelector('.hero'), document.getElementById('agent'), document.querySelector('footer')];
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting && e.boundingClientRect.top < 100){ header.classList.add('dark-mode'); } });
+  }, {rootMargin:'-40px 0px -85% 0px'});
+  const lightSections = [document.getElementById('how'), document.getElementById('orgs')];
+  darkSections.forEach(s=> s && io.observe(s));
+  const io2 = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting && e.boundingClientRect.top < 100){ header.classList.remove('dark-mode'); } });
+  }, {rootMargin:'-40px 0px -85% 0px'});
+  lightSections.forEach(s=> s && io2.observe(s));
+
+  // Only the hero section carries the animated network canvas now — every
+  // other dark section uses the static dot-grid background instead, so
+  // this only ever finds one layer, but stays written generically in case
+  // a canvas is added back to another section later.
+  const layers = Array.from(document.querySelectorAll('section, footer')).map(section => {
+    const canvas = section.querySelector('.net-local');
+    if (!canvas) return null;
+    return { section, canvas, ctx: canvas.getContext('2d'), theme: 'dark', intensity: 1.15 };
+  }).filter(Boolean);
+
+  const DARK_LINE = '255,106,0';
+  const DARK_NODE = '255,145,66';
+  const LIGHT_LINE = '18,21,27';
+  const LIGHT_NODE = '255,106,0';
+
+  let dpr = Math.min(window.devicePixelRatio || 1, 2);
+  let pageWidth = 0, pageHeight = 0;
+  let particles = [];
+  const mouse = { x: -9999, y: -9999, active: false };
+
+  function layoutCanvases(){
+    pageWidth = document.documentElement.clientWidth;
+    pageHeight = document.documentElement.scrollHeight;
+    layers.forEach(l => {
+      const w = l.section.offsetWidth, h = l.section.offsetHeight;
+      l.canvas.width = w * dpr; l.canvas.height = h * dpr;
+      l.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    });
+    const targetCount = Math.max(200, Math.min(460, Math.floor((pageWidth * pageHeight) / 5400)));
+    particles = Array.from({ length: targetCount }, () => ({
+      x: Math.random() * pageWidth, y: Math.random() * pageHeight,
+      vx: (Math.random() - 0.5) * 0.45, vy: (Math.random() - 0.5) * 0.45,
+      r: Math.random() * 1.8 + 1.0, depth: Math.random() * 0.7 + 0.4,
+    }));
+  }
+  window.addEventListener('resize', layoutCanvases);
+  window.addEventListener('load', layoutCanvases);
+  layoutCanvases();
+  setTimeout(layoutCanvases, 400);
+  setTimeout(layoutCanvases, 1200);
+
+  window.addEventListener('mousemove', (e) => { mouse.x = e.pageX; mouse.y = e.pageY; mouse.active = true; });
+  window.addEventListener('mouseleave', () => { mouse.active = false; });
+
+  const MAX_DIST = 190, MOUSE_RADIUS = 220, MOUSE_FORCE = 0.05;
+
+  function frame(){
+    for (const p of particles){
+      p.x += p.vx * p.depth; p.y += p.vy * p.depth;
+      if (mouse.active){
+        const dx = mouse.x - p.x, dy = mouse.y - p.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < MOUSE_RADIUS && dist > 0.001){
+          const force = (1 - dist / MOUSE_RADIUS) * MOUSE_FORCE;
+          p.vx += (dx / dist) * force * 0.02; p.vy += (dy / dist) * force * 0.02;
+        }
+      }
+      p.vx *= 0.99; p.vy *= 0.99;
+      if (p.x < -20) p.x = pageWidth + 20;
+      if (p.x > pageWidth + 20) p.x = -20;
+      if (p.y < -20) p.y = pageHeight + 20;
+      if (p.y > pageHeight + 20) p.y = -20;
+    }
+    for (const l of layers){
+      const top = l.section.offsetTop, h = l.section.offsetHeight, w = l.section.offsetWidth;
+      const bottom = top + h, margin = MAX_DIST;
+      const visible = particles.filter(p => p.y > top - margin && p.y < bottom + margin && p.x > -margin && p.x < w + margin);
+      const ctx = l.ctx;
+      ctx.clearRect(0, 0, w, h);
+      const lineColor = l.theme === 'dark' ? DARK_LINE : LIGHT_LINE;
+      const nodeColor = l.theme === 'dark' ? DARK_NODE : LIGHT_NODE;
+      ctx.lineWidth = 1.2;
+      for (let i = 0; i < visible.length; i++){
+        for (let j = i + 1; j < visible.length; j++){
+          const a = visible[i], b = visible[j];
+          const dist = Math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2);
+          if (dist < MAX_DIST){
+            const alpha = Math.pow(1 - dist / MAX_DIST, 1.4) * 0.6 * l.intensity * Math.min(a.depth, b.depth);
+            ctx.strokeStyle = `rgba(${lineColor},${alpha.toFixed(3)})`;
+            ctx.beginPath(); ctx.moveTo(a.x, a.y - top); ctx.lineTo(b.x, b.y - top); ctx.stroke();
+          }
+        }
+      }
+      for (const p of visible){
+        const alpha = Math.min(1, 0.7 * l.intensity * p.depth);
+        ctx.shadowBlur = 10 * p.depth;
+        ctx.shadowColor = `rgba(${nodeColor},${Math.min(0.8,alpha*1.05).toFixed(3)})`;
+        ctx.fillStyle = `rgba(${nodeColor},${alpha.toFixed(3)})`;
+        ctx.beginPath(); ctx.arc(p.x, p.y - top, p.r, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.shadowBlur = 0;
+    }
+    requestAnimationFrame(frame);
+  }
+  frame();
+</script>
+
+</body>
+</html>

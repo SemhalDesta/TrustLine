@@ -1,8 +1,54 @@
 const express = require("express");
 const { requireAuth } = require("../middleware/auth");
 const { runVerification } = require("../agent");
+const { getRecentLogs } = require("../services/dbService");
 
 const router = express.Router();
+
+/**
+ * Usage summary + registered-numbers list for the platform dashboard.
+ *
+ * SCOPE NOTE: there's no data model yet linking a specific platform
+ * account to "their" registered numbers — VerificationLog just records
+ * every check globally. These routes derive real numbers from that shared
+ * audit log rather than fabricating data, but until per-account ownership
+ * exists, every platform account sees the same global activity. Revisit
+ * once PlatformAccount <-> phone number ownership is modeled.
+ */
+router.get("/usage", requireAuth(["platform_account"]), async (req, res) => {
+  const logs = await getRecentLogs(500);
+  const distinctNumbers = new Set(logs.map((l) => l.phone_number || l.phoneNumber));
+  const verifiedCount = logs.filter((l) => (l.risk_level || l.verdict?.riskLevel) === "LOW").length;
+
+  res.json({
+    registered: distinctNumbers.size,
+    verified: verifiedCount,
+    pending: 0, // no "pending verification" concept yet — every check completes synchronously
+    checksThisMonth: logs.length,
+    planLimit: 200, // static placeholder until billing/plans are modeled
+  });
+});
+
+router.get("/numbers", requireAuth(["platform_account"]), async (req, res) => {
+  const logs = await getRecentLogs(100);
+  const seen = new Set();
+  const numbers = [];
+
+  for (const log of logs) {
+    const phoneNumber = log.phone_number || log.phoneNumber;
+    if (seen.has(phoneNumber)) continue; // keep only the most recent check per number
+    seen.add(phoneNumber);
+
+    const riskLevel = log.risk_level || log.verdict?.riskLevel;
+    numbers.push({
+      phoneNumber,
+      status: riskLevel === "HIGH" ? "flagged" : "verified",
+      lastChecked: log.created_at || log.at || null,
+    });
+  }
+
+  res.json(numbers);
+});
 
 /** Bulk-verify a list of numbers — reuses the exact same contract as the worker flow. */
 router.post("/bulk-verify", requireAuth(["platform_account"]), async (req, res) => {

@@ -46,14 +46,22 @@ async function dbCrossCheck(state) {
       ],
     };
   } catch (err) {
+    let errorMessage = err?.message || err?.code;
+    if (!errorMessage) {
+      try {
+        errorMessage = JSON.stringify(err);
+      } catch {
+        errorMessage = String(err);
+      }
+    }
     return {
       signals: {
-        dbCrossCheck: { available: false, error: err.message },
+        dbCrossCheck: { available: false, error: errorMessage },
       },
       reasoningTrace: [
         {
           step: "dbCrossCheck",
-          detail: `Database cross-check failed: ${err.message}`,
+          detail: `Database cross-check failed: ${errorMessage}`,
           timestamp: new Date().toISOString(),
         },
       ],

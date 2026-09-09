@@ -14,6 +14,12 @@ router.post("/reports/:phoneNumber/verify", requireAuth(["ngo_admin"]), async (r
   res.json({ status: "verified", phoneNumber: req.params.phoneNumber });
 });
 
+router.get("/logs", requireAuth(["ngo_admin"]), async (req, res) => {
+  const limit = Number(req.query.limit) || 50;
+  const logs = await getRecentLogs(limit);
+  res.json({ logs });
+});
+
 router.get("/analytics/summary", requireAuth(["ngo_admin"]), async (req, res) => {
   const logs = await getRecentLogs(500);
   const total = logs.length;
