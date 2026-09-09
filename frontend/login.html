@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Log in — TrustLine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#0A0D12;
+    --panel:#0F141C;
+    --panel-2:#141B26;
+    --paper:#E9EDF2;
+    --paper-dim:#DCE3EB;
+    --ink:#12151B;
+    --ink-dim:#565F6B;
+    --brand:#FF6A00;
+    --brand-bright:#FF9142;
+    --amber:#D98E4A;
+    --red:#E5483A;
+    --green:#5FBF8A;
+    --line:rgba(255,255,255,0.08);
+    --line-dark:rgba(18,21,27,0.10);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background-color:var(--paper-dim);
+    background-image:radial-gradient(circle, rgba(18,21,27,0.16) 1.3px, transparent 1.3px);
+    background-size:26px 26px;
+    color:var(--ink);
+    font-family:'Inter', sans-serif;
+    font-size:16px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  h1,h2,h3{font-family:'Space Grotesk', sans-serif; font-weight:600; letter-spacing:-0.01em;}
+  a{color:inherit; text-decoration:none;}
+  .wrap{max-width:1080px; margin:0 auto; padding:0 28px;}
+
+  .btn{
+    font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:14px;
+    padding:9px 18px; border-radius:8px; display:inline-flex; align-items:center; gap:6px;
+    cursor:pointer; transition:transform .15s ease, background .2s, border-color .2s;
+    border:1px solid transparent;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn-primary{background:var(--brand); color:var(--void); border:none; width:100%; justify-content:center; padding:13px 18px; font-size:15px;}
+  .btn-primary:hover{background:var(--brand-bright);}
+  .btn-primary:disabled{opacity:0.6; cursor:default;}
+
+  /* ---------- Split screen ---------- */
+  main.split{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    min-height:100vh;
+  }
+
+  .context{
+    position:relative;
+    background-color:var(--void);
+    background-image:radial-gradient(circle, rgba(239,241,234,0.08) 1.3px, transparent 1.3px);
+    background-size:26px 26px;
+    color:var(--paper);
+    display:flex; flex-direction:column; justify-content:center;
+    padding:100px 60px;
+  }
+  .context-inner{max-width:400px;}
+  .context-mark{margin-bottom:28px;}
+  .context h1{font-size:clamp(26px,3vw,32px); line-height:1.2; color:var(--paper);}
+  .context p.lede{margin-top:16px; color:rgba(239,241,234,0.62); font-size:15.5px; max-width:36ch;}
+  .context-list{margin-top:36px; display:flex; flex-direction:column; gap:20px;}
+  .context-item{display:flex; gap:14px; align-items:flex-start;}
+  .context-item .mark{
+    width:22px; height:22px; border-radius:50%; border:1.5px solid rgba(255,106,0,0.5);
+    color:var(--brand-bright); font-size:12px; font-weight:600;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:2px;
+  }
+  .context-item div h3{font-size:14.5px; color:var(--paper); margin-bottom:3px; font-weight:600;}
+  .context-item div p{font-size:13.5px; color:rgba(239,241,234,0.55);}
+
+  .formside{
+    display:flex; flex-direction:column; justify-content:center;
+    padding:100px 60px;
+  }
+  .formside-inner{max-width:380px; width:100%;}
+  .formside h2{font-size:clamp(24px,2.6vw,28px); margin-bottom:8px;}
+  .formside p.sub{color:var(--ink-dim); font-size:15px; margin-bottom:32px;}
+
+  .role-select{display:flex; gap:8px; margin-bottom:28px; border:1px solid var(--line-dark); border-radius:8px; padding:4px; background:rgba(255,255,255,0.5);}
+  .role-btn{
+    flex:1; padding:10px 12px; border-radius:6px; border:none; background:none; cursor:pointer;
+    font-family:'Inter', sans-serif; font-weight:600; font-size:13.5px; color:var(--ink-dim);
+    transition:background .15s, color .15s;
+  }
+  .role-btn.active{background:#fff; color:var(--ink); box-shadow:0 1px 2px rgba(18,21,27,0.08);}
+
+  .field{margin-bottom:18px;}
+  .field label{display:block; font-size:13px; font-weight:600; color:var(--ink); margin-bottom:8px;}
+  .field input{
+    width:100%; background:#fff; border:1px solid var(--line-dark); border-radius:6px;
+    padding:13px 14px; font-family:'Inter', sans-serif; font-size:15px; color:var(--ink);
+  }
+  .field input::placeholder{color:rgba(18,21,27,0.32);}
+  .field input:focus{outline:none; border-color:var(--brand);}
+
+  .form-error{margin-bottom:16px; font-size:13px; color:var(--red); display:none;}
+  .form-error.show{display:block;}
+
+  .formside-foot{margin-top:20px; font-size:13.5px; color:var(--ink-dim); text-align:center;}
+  .formside-foot a{color:var(--brand); font-weight:600;}
+  .formside-foot a:hover{text-decoration:underline;}
+
+  @media (max-width:900px){
+    main.split{grid-template-columns:1fr;}
+    .context{padding:60px 32px 50px;}
+    .formside{padding:50px 32px 80px;}
+  }
+</style>
+</head>
+<body>
+
+<main class="split">
+  <!-- CONTEXT PANEL -->
+  <div class="context">
+    <div class="context-inner">
+      <a href="about.html" class="context-mark" aria-label="Back to TrustLine">
+        <svg width="40" height="40" viewBox="0 0 40 40">
+          <rect x="2" y="2" width="36" height="36" rx="10" fill="#FF6A00"/>
+          <line x1="11" y1="9" x2="20" y2="15" stroke="#0A0D12" stroke-width="1.8" stroke-linecap="round"/>
+          <line x1="29" y1="9" x2="20" y2="15" stroke="#0A0D12" stroke-width="1.8" stroke-linecap="round"/>
+          <line x1="20" y1="6" x2="20" y2="15" stroke="#0A0D12" stroke-width="1.8" stroke-linecap="round"/>
+          <circle cx="11" cy="9" r="2.1" fill="#FF6A00" stroke="#0A0D12" stroke-width="1.5"/>
+          <circle cx="29" cy="9" r="2.1" fill="#FF6A00" stroke="#0A0D12" stroke-width="1.5"/>
+          <circle cx="20" cy="6" r="1.8" fill="#FF6A00" stroke="#0A0D12" stroke-width="1.5"/>
+          <rect x="14.5" y="15" width="11" height="19" rx="2.6" fill="none" stroke="#0A0D12" stroke-width="2"/>
+          <line x1="17.5" y1="18.5" x2="22.5" y2="18.5" stroke="#0A0D12" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="20" cy="30.5" r="1.1" fill="#0A0D12"/>
+        </svg>
+      </a>
+      <h1>Built for the people who verify at scale.</h1>
+      <p class="lede">One login, two very different toolsets — depending on which side of the recruitment chain you're on.</p>
+
+      <div class="context-list">
+        <div class="context-item">
+          <div class="mark">1</div>
+          <div>
+            <h3>NGOs &amp; labor ministries</h3>
+            <p>Review worker-submitted reports, track fraud by corridor, export for policy work.</p>
+          </div>
+        </div>
+        <div class="context-item">
+          <div class="mark">2</div>
+          <div>
+            <h3>Recruitment platforms</h3>
+            <p>Bulk-verify your registered agents and generate a "TrustLine Verified" badge.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORM PANEL -->
+  <div class="formside">
+    <div class="formside-inner">
+      <h2>Log in</h2>
+      <p class="sub">Choose your organization type, then sign in.</p>
+
+      <div class="role-select">
+        <button type="button" class="role-btn active" id="roleNgo">NGO / Ministry</button>
+        <button type="button" class="role-btn" id="rolePlatform">Recruitment Platform</button>
+      </div>
+
+      <form id="loginForm">
+        <div class="field">
+          <label for="email">Work email</label>
+          <input type="email" id="email" placeholder="you@organization.org" autocomplete="email">
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <div class="form-error" id="loginError">Enter your work email and password to continue.</div>
+        <button type="submit" class="btn btn-primary" id="loginBtn">Log in</button>
+      </form>
+
+      <p class="formside-foot">Don't have access yet? <a href="about.html">Contact your TrustLine partnership lead</a></p>
+    </div>
+  </div>
+</main>
+<script>
+  const API_BASE = "http://localhost:4000/api";
+
+  const roleNgo = document.getElementById("roleNgo");
+  const rolePlatform = document.getElementById("rolePlatform");
+  let selectedRole = "ngo_admin";
+
+  roleNgo.addEventListener("click", () => {
+    selectedRole = "ngo_admin";
+    roleNgo.classList.add("active");
+    rolePlatform.classList.remove("active");
+  });
+  rolePlatform.addEventListener("click", () => {
+    selectedRole = "platform_account";
+    rolePlatform.classList.add("active");
+    roleNgo.classList.remove("active");
+  });
+
+  const form = document.getElementById("loginForm");
+  const loginBtn = document.getElementById("loginBtn");
+  const loginError = document.getElementById("loginError");
+  const emailInput = document.getElementById("email");
+  const passwordInput = document.getElementById("password");
+
+  /* Calls the real backend login endpoint. Note: this endpoint currently
+     issues a token for ANY non-empty email/password (see backend/src/routes/auth.js
+     for why — no real account table is populated yet). The token IS real
+     and DOES get checked by the protected NGO/platform routes; only the
+     credential check itself is a stub. */
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!emailInput.value.trim() || !passwordInput.value.trim()){
+      loginError.textContent = "Enter your work email and password to continue.";
+      loginError.classList.add("show");
+      return;
+    }
+    loginError.classList.remove("show");
+    loginBtn.disabled = true;
+    loginBtn.textContent = "Logging in…";
+
+    try {
+      const res = await fetch(`${API_BASE}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: emailInput.value.trim(),
+          password: passwordInput.value,
+          role: selectedRole,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        loginError.textContent = data.error || "Login failed. Please try again.";
+        loginError.classList.add("show");
+        loginBtn.disabled = false;
+        loginBtn.textContent = "Log in";
+        return;
+      }
+
+      localStorage.setItem("trustline_token", data.token);
+      localStorage.setItem("trustline_role", data.role);
+
+      window.location.href = selectedRole === "ngo_admin" ? "ngo-dashboard.html" : "platform-dashboard.html";
+    } catch (err) {
+      loginError.textContent = "Couldn't reach the server. Is the backend running?";
+      loginError.classList.add("show");
+      loginBtn.disabled = false;
+      loginBtn.textContent = "Log in";
+    }
+  });
+
+  emailInput.addEventListener("input", () => loginError.classList.remove("show"));
+  passwordInput.addEventListener("input", () => loginError.classList.remove("show"));
+</script>
+
+</body>
+</html>

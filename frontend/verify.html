@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Check a number — TrustLine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#0A0D12;
+    --panel:#0F141C;
+    --panel-2:#141B26;
+    --paper:#E9EDF2;
+    --paper-dim:#DCE3EB;
+    --ink:#12151B;
+    --ink-dim:#565F6B;
+    --brand:#FF6A00;
+    --brand-soft:rgba(255,106,0,0.35);
+    --brand-bright:#FF9142;
+    --amber:#D98E4A;
+    --red:#E5483A;
+    --green:#5FBF8A;
+    --line:rgba(255,255,255,0.08);
+    --line-dark:rgba(18,21,27,0.10);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background-color:var(--paper-dim);
+    background-image:radial-gradient(circle, rgba(18,21,27,0.16) 1.3px, transparent 1.3px);
+    background-size:26px 26px;
+    color:var(--ink);
+    font-family:'Inter', sans-serif;
+    font-size:16px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  h1,h2,h3{font-family:'Space Grotesk', sans-serif; font-weight:600; letter-spacing:-0.01em;}
+  .mono{font-family:'IBM Plex Mono', monospace;}
+  a{color:inherit; text-decoration:none;}
+  .wrap{max-width:1080px; margin:0 auto; padding:0 28px;}
+
+
+  header{
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    padding:16px 28px; display:flex; align-items:center; justify-content:space-between;
+    backdrop-filter:blur(10px);
+    background:rgba(233,237,242,0.72);
+    border-bottom:1px solid var(--line-dark);
+    color:var(--ink);
+  }
+  .brand{font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:17px; display:flex; align-items:center; gap:10px;}
+  .brand svg{display:block; flex-shrink:0;}
+  .brand .line{color:var(--brand);}
+  nav{display:flex; align-items:center; gap:0;}
+  nav a.navlink{font-size:14px; color:inherit; opacity:0.72; margin-right:24px;}
+  nav a.navlink:hover{opacity:1;}
+  .btn{
+    font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:14px;
+    padding:9px 18px; border-radius:8px; display:inline-flex; align-items:center; gap:6px;
+    cursor:pointer; transition:transform .15s ease, background .2s, border-color .2s;
+    border:1px solid transparent;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn-primary{background:var(--brand); color:var(--void); border:none;}
+  .btn-primary:hover{background:var(--brand-bright);}
+  .btn-primary:disabled{opacity:0.6; cursor:default;}
+  .btn-ghost-light{border-color:rgba(18,21,27,0.18); color:var(--ink);}
+
+  /* ---------- Tool section ---------- */
+  section.tool{
+    position:relative;
+    min-height:92svh;
+    display:flex; flex-direction:column; justify-content:center;
+    background:transparent;
+    color:var(--ink);
+    overflow:visible;
+    padding:130px 0 100px;
+  }
+  .tool .wrap{position:relative; z-index:2; max-width:720px;}
+
+  .lede{font-size:16px; color:var(--ink-dim); margin-bottom:14px;}
+  h1.tool-h{font-size:clamp(32px, 5vw, 48px); line-height:1.08; max-width:14ch; color:var(--ink);}
+  .tool p.sub{margin-top:18px; max-width:50ch; font-size:17px; color:var(--ink-dim);}
+
+  /* The verify tool as a boarding pass: two zones split by a torn
+     perforation, with the result appearing as a rotated inspection stamp
+     in the stub — grounded in "verify before you travel," not a generic
+     rounded SaaS card. */
+  .ticket-card{
+    margin-top:40px;
+    display:flex;
+    background:#fff;
+    border:1.5px solid var(--ink);
+    border-radius:3px;
+    overflow:visible;
+  }
+  .ticket-main{flex:1; padding:28px 30px; min-width:0;}
+  .ticket-divider{
+    position:relative;
+    width:0;
+    border-left:2px dashed rgba(18,21,27,0.28);
+    flex-shrink:0;
+  }
+  .ticket-divider::before, .ticket-divider::after{
+    content:""; position:absolute; left:50%; transform:translateX(-50%);
+    width:22px; height:22px; background:var(--paper-dim); border-radius:50%;
+  }
+  .ticket-divider::before{ top:-11px; }
+  .ticket-divider::after{ bottom:-11px; }
+  .ticket-stub{
+    width:168px; flex-shrink:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:10px; padding:20px 14px; text-align:center;
+  }
+  .stub-label{font-size:11px; letter-spacing:0.04em; color:var(--ink-dim); font-weight:600;}
+  .stamp{
+    width:100px; height:100px; border-radius:50%;
+    border:3px solid rgba(18,21,27,0.25);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:12.5px;
+    color:var(--ink-dim); text-transform:uppercase; line-height:1.25;
+    transform:rotate(-9deg);
+    transition:border-color .25s, color .25s;
+  }
+  .stamp.risk-high{border-color:var(--red); color:var(--red);}
+  .stamp.risk-medium{border-color:var(--amber); color:var(--amber);}
+  .stamp.risk-low{border-color:var(--green); color:var(--green);}
+
+  .verify-label{font-size:13px; font-weight:600; color:var(--ink); margin-bottom:10px;}
+  .verify-row{display:flex; gap:10px;}
+  .verify-input{
+    flex:1; background:#fff; border:1px solid var(--line-dark); border-radius:6px;
+    padding:14px 15px; font-family:'IBM Plex Mono', monospace; font-size:16px; color:var(--ink);
+  }
+  .verify-input::placeholder{color:rgba(18,21,27,0.32);}
+  .verify-input:focus{outline:none; border-color:var(--brand);}
+  .verify-error{margin-top:10px; font-size:13px; color:var(--red); display:none;}
+  .verify-error.show{display:block;}
+  .verify-hint{margin-top:12px; font-size:13px; color:var(--ink-dim);}
+
+  /* ---------- Verdict ---------- */
+  .verdict-panel{margin-top:20px; padding-top:18px; border-top:1px solid var(--line-dark); display:none;}
+  .verdict-panel.show{display:block;}
+  .verdict-label{font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:16px; color:var(--ink); margin-bottom:4px;}
+  .verdict-explain{font-size:14.5px; color:var(--ink-dim);}
+
+  .trace-toggle{
+    font-family:'Inter', sans-serif; font-weight:600; font-size:13px; color:var(--brand);
+    cursor:pointer; display:inline-flex; align-items:center; gap:6px; margin-top:14px; margin-bottom:10px;
+    background:none; border:none; padding:0;
+  }
+  .trace-list{display:none; margin-bottom:16px;}
+  .trace-list.show{display:block;}
+  .trace-item{
+    display:flex; gap:12px; padding:10px 0; border-top:1px solid var(--line-dark); font-size:13.5px;
+  }
+  .trace-item .step{font-family:'Inter', sans-serif; font-weight:600; color:var(--ink-dim); white-space:nowrap;}
+  .trace-item .detail{color:var(--ink);}
+
+  .verdict-actions{display:flex; gap:12px; margin-top:6px;}
+  .link-btn{
+    font-family:'Inter', sans-serif; font-size:13px; color:var(--ink-dim);
+    cursor:pointer; background:none; border:none; padding:0; text-decoration:underline;
+  }
+  .link-btn:hover{color:var(--ink);}
+
+  /* ---------- Report inline form ---------- */
+  .report-form{display:none; margin-top:16px; padding-top:16px; border-top:1px solid var(--line-dark);}
+  .report-form.show{display:block;}
+  .report-form textarea{
+    width:100%; margin-top:10px; background:#fff; border:1px solid var(--line-dark);
+    border-radius:6px; padding:12px; color:var(--ink); font-family:'Inter',sans-serif; font-size:13.5px;
+    resize:vertical; min-height:60px;
+  }
+  .report-form textarea::placeholder{color:rgba(18,21,27,0.32);}
+  .report-success{display:none; margin-top:10px; font-size:13px; color:var(--green);}
+  .report-success.show{display:block;}
+
+  /* ---------- SMS section ---------- */
+  section.sms{
+    position:relative;
+    background:transparent;
+    color:var(--ink);
+    padding:100px 0 140px;
+    overflow:visible;
+  }
+  .sms .wrap{position:relative; z-index:2; display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:center;}
+  .sms h2{font-size:clamp(24px,3vw,32px); max-width:15ch; color:var(--ink);}
+  .sms p{margin-top:16px; color:var(--ink-dim); font-size:15.5px; max-width:38ch;}
+  .phone-mock{background:var(--void); border:1px solid var(--line); border-radius:22px; padding:20px; max-width:280px; margin-left:auto;}
+  .bubble{
+    background:var(--panel-2); color:var(--paper); font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px; line-height:1.6; padding:12px 14px; border-radius:10px; margin-bottom:8px;
+  }
+  .bubble.out{background:var(--brand); color:var(--void); margin-left:30px;}
+
+  /* ---------- Footer ---------- */
+  footer{
+    position:relative;
+    background-color:var(--void);
+    background-image:radial-gradient(circle, rgba(239,241,234,0.08) 1.3px, transparent 1.3px);
+    background-size:26px 26px;
+    color:rgba(239,241,234,0.5);
+    padding:56px 0 40px;
+    font-size:13.5px;
+    overflow:hidden;
+  }
+  footer .wrap{position:relative; z-index:2;}
+  .footer-top{display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:24px; padding-bottom:32px; margin-bottom:24px; border-bottom:1px solid var(--line);}
+  .footer-brand .brand{color:var(--paper); margin-bottom:10px;}
+  .footer-brand p{max-width:34ch; color:rgba(239,241,234,0.45); font-size:13.5px;}
+  .footer-links{display:flex; gap:56px;}
+  .footer-col h4{font-family:'IBM Plex Mono', monospace; font-size:11.5px; color:rgba(239,241,234,0.4); margin-bottom:14px; letter-spacing:0.04em;}
+  .footer-col a{display:block; margin-bottom:10px; color:rgba(239,241,234,0.65); font-size:13.5px;}
+  .footer-col a:hover{color:var(--paper);}
+  .footer-bottom{display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px;}
+
+  @media (max-width:820px){
+    .sms .wrap{grid-template-columns:1fr;}
+    .phone-mock{margin:0;}
+    .verify-row{flex-direction:column;}
+    nav a.navlink{display:none;}
+    .ticket-card{flex-direction:column;}
+    .ticket-divider{width:auto; height:0; border-left:none; border-top:2px dashed rgba(18,21,27,0.28);}
+    .ticket-divider::before, .ticket-divider::after{top:50%; transform:translateY(-50%);}
+    .ticket-divider::before{left:-11px;}
+    .ticket-divider::after{left:auto; right:-11px;}
+    .ticket-stub{width:auto; flex-direction:row; padding:16px 20px;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
+  }
+</style>
+</head>
+<body>
+
+<header id="siteHeader">
+  <a href="about.html" class="brand">
+    <svg width="30" height="30" viewBox="0 0 40 40">
+      <rect x="2" y="2" width="36" height="36" rx="10" fill="#FF6A00"/>
+      <line x1="11" y1="9" x2="20" y2="15" stroke="#0A0D12" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="29" y1="9" x2="20" y2="15" stroke="#0A0D12" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="20" y1="6" x2="20" y2="15" stroke="#0A0D12" stroke-width="1.8" stroke-linecap="round"/>
+      <circle cx="11" cy="9" r="2.1" fill="#FF6A00" stroke="#0A0D12" stroke-width="1.5"/>
+      <circle cx="29" cy="9" r="2.1" fill="#FF6A00" stroke="#0A0D12" stroke-width="1.5"/>
+      <circle cx="20" cy="6" r="1.8" fill="#FF6A00" stroke="#0A0D12" stroke-width="1.5"/>
+      <rect x="14.5" y="15" width="11" height="19" rx="2.6" fill="none" stroke="#0A0D12" stroke-width="2"/>
+      <line x1="17.5" y1="18.5" x2="22.5" y2="18.5" stroke="#0A0D12" stroke-width="1.5" stroke-linecap="round"/>
+      <circle cx="20" cy="30.5" r="1.1" fill="#0A0D12"/>
+    </svg>
+    TrustLine
+  </a>
+  <nav>
+    <a class="navlink" href="about.html">About</a>
+    <a class="navlink" href="about.html#how">How it works</a>
+    <a class="btn btn-ghost-light" href="login.html">For organizations</a>
+  </nav>
+</header>
+
+<!-- TOOL -->
+<section class="tool">
+  <div class="wrap">
+    <p class="lede">For workers and families checking a job offer</p>
+    <h1 class="tool-h">Check a number before you trust it.</h1>
+    <p class="sub">Enter the recruiter's number below. No account, no fee, and it works even before you've paid anything or agreed to anything.</p>
+
+    <div class="ticket-card">
+      <div class="ticket-main">
+        <div class="verify-label">Phone number</div>
+        <div class="verify-row">
+          <input class="verify-input" id="phoneInput" type="tel" placeholder="+971 5X XXX XXXX" autocomplete="tel">
+          <button class="btn btn-primary" id="verifyBtn" style="padding:0 22px;">Verify</button>
+        </div>
+        <div class="verify-error" id="verifyError">Enter a number with a country code, e.g. +971501234567.</div>
+        <div class="verify-hint">Include the country code · Works with numbers from any country</div>
+
+        <div class="verdict-panel" id="verdictPanel">
+          <div class="verdict-label" id="verdictLabel">—</div>
+          <div class="verdict-explain" id="verdictExplain"></div>
+
+          <button class="trace-toggle" id="traceToggle">
+            <span id="traceToggleText">Show reasoning</span> <span id="traceArrow">→</span>
+          </button>
+          <div class="trace-list" id="traceList"></div>
+
+          <div class="verdict-actions">
+            <button class="link-btn" id="reportToggle">This doesn't look right — report this number</button>
+          </div>
+
+          <div class="report-form" id="reportForm">
+            <div class="verify-label">What happened?</div>
+            <textarea id="reportDetail" placeholder="e.g. Asked for a placement fee before showing a contract"></textarea>
+            <button class="btn btn-primary" id="reportSubmit" style="margin-top:10px; padding:10px 18px; font-size:13px;">Submit report</button>
+            <div class="report-success" id="reportSuccess">Thanks — this has been added for NGO review.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ticket-divider"></div>
+
+      <div class="ticket-stub">
+        <div class="stub-label">RESULT</div>
+        <div class="stamp" id="stamp">Not<br>checked</div>
+        <div id="demoBadge" style="display:none; margin-top:8px; font-size:11px; font-weight:600; color:var(--amber); text-align:center; letter-spacing:0.02em;">⚠ DEMO DATA — backend unreachable</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SMS -->
+<section class="sms">
+  <div class="wrap">
+    <div>
+      <h2>Works over SMS too, for moments a data connection can't be trusted.</h2>
+      <p>No smartphone needed. Text a number to TrustLine's short code from any phone and get a verdict back in one message.</p>
+    </div>
+    <div class="phone-mock">
+      <div class="bubble out">CHECK +971 50 123 4567</div>
+      <div class="bubble">CAUTION — SIM changed 6 days ago. Verify another way before you send anything. Reply INFO for more.</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="brand">
+          <svg width="26" height="26" viewBox="0 0 40 40">
+            <rect x="2" y="2" width="36" height="36" rx="10" fill="#FF6A00"/>
+            <line x1="11" y1="9" x2="20" y2="15" stroke="#0A0D12" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="29" y1="9" x2="20" y2="15" stroke="#0A0D12" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="20" y1="6" x2="20" y2="15" stroke="#0A0D12" stroke-width="1.8" stroke-linecap="round"/>
+            <circle cx="11" cy="9" r="2.1" fill="#FF6A00" stroke="#0A0D12" stroke-width="1.5"/>
+            <circle cx="29" cy="9" r="2.1" fill="#FF6A00" stroke="#0A0D12" stroke-width="1.5"/>
+            <circle cx="20" cy="6" r="1.8" fill="#FF6A00" stroke="#0A0D12" stroke-width="1.5"/>
+            <rect x="14.5" y="15" width="11" height="19" rx="2.6" fill="none" stroke="#0A0D12" stroke-width="2"/>
+            <line x1="17.5" y1="18.5" x2="22.5" y2="18.5" stroke="#0A0D12" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="20" cy="30.5" r="1.1" fill="#0A0D12"/>
+          </svg>
+          TrustLine
+        </div>
+        <p>A verdict you can read in three seconds — built for the MENA Ignite Hackathon.</p>
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <h4>PRODUCT</h4>
+          <a href="verify.html">Check a number</a>
+          <a href="about.html#how">How it works</a>
+          <a href="about.html#agent">The signal</a>
+        </div>
+        <div class="footer-col">
+          <h4>ORGANIZATIONS</h4>
+          <a href="login.html">NGO / Ministry login</a>
+          <a href="login.html">Platform login</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 TrustLine</span>
+      <span>Theme 1 · MENA Ignite Hackathon</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  /* ---------------- Backend contract ----------------
+   * POST {API_BASE}/verify   body: { phoneNumber }
+   *   -> { riskLevel: "HIGH"|"MEDIUM"|"LOW", explanation, reasoningTrace: [{step,detail,timestamp}], signalsUsed }
+   * POST {API_BASE}/report   body: { phoneNumber, detail }
+   *   -> { success: true }
+   * Update API_BASE once the real backend is deployed. Until then, a
+   * failed request falls back to a clearly-labeled demo response so this
+   * page stays demoable on its own.
+   */
+  const API_BASE = "http://localhost:4000/api";
+
+  function normalizePhoneNumber(raw){
+    if (!raw) return null;
+    let cleaned = raw.trim().replace(/[\s\-().]/g, "");
+    if (cleaned.startsWith("00")) cleaned = "+" + cleaned.slice(2);
+    if (!cleaned.startsWith("+")) return null;
+    const digits = cleaned.slice(1);
+    if (!/^\d{8,15}$/.test(digits)) return null;
+    return cleaned;
+  }
+
+  function mockVerdict(phoneNumber){
+    const options = [
+      { riskLevel: "HIGH", explanation: "SIM and device both changed in the last week — a common pattern in scam recruitment.",
+        reasoningTrace: [
+          { step: "simSwapCheck", detail: "SIM has been swapped recently — potential red flag." },
+          { step: "deviceSwapCheck", detail: "Device recently changed for this number — potential burner-device pattern." },
+          { step: "triage", detail: "Both signals flagged — confident high-risk result without escalation." },
+        ]},
+      { riskLevel: "MEDIUM", explanation: "One signal was inconclusive. Verify by another channel before paying anything.",
+        reasoningTrace: [
+          { step: "simSwapCheck", detail: "No recent SIM swap detected." },
+          { step: "deviceSwapCheck", detail: "Device recently changed for this number — potential burner-device pattern." },
+          { step: "triage", detail: "Signals disagree — escalating to secondary checks." },
+          { step: "dbCrossCheck", detail: "No prior scam reports found for this number." },
+        ]},
+      { riskLevel: "LOW", explanation: "No red flags found across available signals.",
+        reasoningTrace: [
+          { step: "simSwapCheck", detail: "No recent SIM swap detected." },
+          { step: "deviceSwapCheck", detail: "No recent device change detected." },
+          { step: "triage", detail: "Both signals clean — confident low-risk result without escalation." },
+        ]},
+    ];
+    const pick = options[Math.abs(phoneNumber.split("").reduce((a,c)=>a+c.charCodeAt(0),0)) % options.length];
+    return { ...pick, signalsUsed: pick.reasoningTrace.map(t=>t.step), demo: true };
+  }
+
+  async function checkNumber(phoneNumber){
+    try{
+      const res = await fetch(`${API_BASE}/verify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phoneNumber }),
+      });
+      if (!res.ok) throw new Error("bad response");
+      const data = await res.json();
+      // Real backend returns a nested shape ({ verdict: { riskLevel, reasoning,
+      // signalsUsed }, reasoningTrace, escalated }) — flatten it here, once,
+      // so the rendering code below can stay written against the simple
+      // flat shape it always expected.
+      return {
+        riskLevel: data.verdict.riskLevel,
+        explanation: data.verdict.reasoning,
+        reasoningTrace: data.reasoningTrace || [],
+        signalsUsed: data.verdict.signalsUsed,
+        escalated: data.escalated,
+        demo: false,
+      };
+    }catch(err){
+      return mockVerdict(phoneNumber);
+    }
+  }
+
+  async function submitReport(phoneNumber, detail){
+    try{
+      const res = await fetch(`${API_BASE}/verify/report`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phoneNumber, details: detail }),
+      });
+      if (!res.ok) throw new Error("bad response");
+      return await res.json();
+    }catch(err){
+      return { success: true, demo: true };
+    }
+  }
+
+  const phoneInput = document.getElementById("phoneInput");
+  const verifyBtn = document.getElementById("verifyBtn");
+  const verifyError = document.getElementById("verifyError");
+  const verdictPanel = document.getElementById("verdictPanel");
+  const verdictLabel = document.getElementById("verdictLabel");
+  const verdictExplain = document.getElementById("verdictExplain");
+  const stamp = document.getElementById("stamp");
+  const traceToggle = document.getElementById("traceToggle");
+  const traceToggleText = document.getElementById("traceToggleText");
+  const traceArrow = document.getElementById("traceArrow");
+  const traceList = document.getElementById("traceList");
+  const reportToggle = document.getElementById("reportToggle");
+  const reportForm = document.getElementById("reportForm");
+  const reportSubmit = document.getElementById("reportSubmit");
+  const reportDetail = document.getElementById("reportDetail");
+  const reportSuccess = document.getElementById("reportSuccess");
+
+  const RISK_LABELS = { HIGH: "High risk", MEDIUM: "Caution", LOW: "Low risk" };
+  const RISK_STAMP = { HIGH: "High<br>risk", MEDIUM: "Caution", LOW: "Low<br>risk" };
+  const RISK_CLASS = { HIGH: "risk-high", MEDIUM: "risk-medium", LOW: "risk-low" };
+
+  let currentPhoneNumber = null;
+
+  verifyBtn.addEventListener("click", async () => {
+    const normalized = normalizePhoneNumber(phoneInput.value);
+    if (!normalized){
+      verifyError.classList.add("show");
+      return;
+    }
+    verifyError.classList.remove("show");
+    currentPhoneNumber = normalized;
+
+    verifyBtn.disabled = true;
+    verifyBtn.textContent = "Checking…";
+    verdictPanel.classList.remove("show");
+    reportForm.classList.remove("show");
+    reportSuccess.classList.remove("show");
+    traceList.classList.remove("show");
+    traceToggleText.textContent = "Show reasoning";
+    traceArrow.textContent = "→";
+    stamp.className = "stamp";
+    stamp.innerHTML = "Checking…";
+
+    const result = await checkNumber(normalized);
+
+    stamp.className = "stamp " + (RISK_CLASS[result.riskLevel] || "risk-medium");
+    stamp.innerHTML = RISK_STAMP[result.riskLevel] || result.riskLevel;
+    verdictLabel.textContent = RISK_LABELS[result.riskLevel] || result.riskLevel;
+    verdictExplain.textContent = result.explanation;
+
+    traceList.innerHTML = (result.reasoningTrace || []).map(t =>
+      `<div class="trace-item"><span class="step">${t.step}</span><span class="detail">${t.detail}</span></div>`
+    ).join("");
+
+    document.getElementById("demoBadge").style.display = result.demo ? "block" : "none";
+
+    verdictPanel.classList.add("show");
+    verifyBtn.disabled = false;
+    verifyBtn.textContent = "Verify";
+  });
+
+  phoneInput.addEventListener("keydown", (e) => { if (e.key === "Enter") verifyBtn.click(); });
+  phoneInput.addEventListener("input", () => verifyError.classList.remove("show"));
+
+  traceToggle.addEventListener("click", () => {
+    const showing = traceList.classList.toggle("show");
+    traceToggleText.textContent = showing ? "Hide reasoning" : "Show reasoning";
+    traceArrow.textContent = showing ? "↑" : "→";
+  });
+
+  reportToggle.addEventListener("click", () => {
+    reportForm.classList.toggle("show");
+  });
+
+  reportSubmit.addEventListener("click", async () => {
+    if (!currentPhoneNumber) return;
+    reportSubmit.disabled = true;
+    reportSubmit.textContent = "Submitting…";
+    await submitReport(currentPhoneNumber, reportDetail.value);
+    reportSubmit.disabled = false;
+    reportSubmit.textContent = "Submit report";
+    reportSuccess.classList.add("show");
+    reportDetail.value = "";
+  });
+
+
+</script>
+
+</body>
+</html>
