@@ -1,7 +1,7 @@
 # TrustLine — Frontend
 
 Five static pages, plain HTML/CSS/JavaScript — no build step, no framework,
-no bundler. Requires the backend running first (see `backend/README.md`).
+no bundler. Requires the backend running first (see the root `README.md`).
 
 ## Pages
 
@@ -70,7 +70,7 @@ configured above.
 ## Known limitations
 
 - **No signup/account-creation flow.** Matches the backend's current
-  scope — see `backend/README.md`'s note on the login stub. The "Don't
+  scope — see the root `README.md`'s note on the login stub. The "Don't
   have access yet?" link on the login page reflects the intended real-world
   model (manual partner onboarding), not a missing feature.
 - **The recruitment-platform bulk-verify** and **NGO logs/analytics** views

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" id="htmlRoot">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -140,22 +140,23 @@
           <circle cx="20" cy="30.5" r="1.1" fill="#0A0D12"/>
         </svg>
       </a>
-      <h1>Built for the people who verify at scale.</h1>
-      <p class="lede">One login, two very different toolsets — depending on which side of the recruitment chain you're on.</p>
+      <button type="button" id="langToggle" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.18); color:#E9EDF2; font-size:13px; padding:6px 14px; border-radius:6px; cursor:pointer; margin-bottom:20px;">العربية</button>
+      <h1 data-i18n="heroHeadline">Built for the people who verify at scale.</h1>
+      <p class="lede" data-i18n="heroLede">One login, two very different toolsets — depending on which side of the recruitment chain you're on.</p>
 
       <div class="context-list">
         <div class="context-item">
           <div class="mark">1</div>
           <div>
-            <h3>NGOs &amp; labor ministries</h3>
-            <p>Review worker-submitted reports, track fraud by corridor, export for policy work.</p>
+            <h3 data-i18n="ngoTitle">NGOs &amp; labor ministries</h3>
+            <p data-i18n="ngoDesc">Review worker-submitted reports, track fraud by corridor, export for policy work.</p>
           </div>
         </div>
         <div class="context-item">
           <div class="mark">2</div>
           <div>
-            <h3>Recruitment platforms</h3>
-            <p>Bulk-verify your registered agents and generate a "TrustLine Verified" badge.</p>
+            <h3 data-i18n="platformTitle">Recruitment platforms</h3>
+            <p data-i18n="platformDesc">Bulk-verify your registered agents and generate a "TrustLine Verified" badge.</p>
           </div>
         </div>
       </div>
@@ -165,33 +166,94 @@
   <!-- FORM PANEL -->
   <div class="formside">
     <div class="formside-inner">
-      <h2>Log in</h2>
-      <p class="sub">Choose your organization type, then sign in.</p>
+      <h2 data-i18n="loginTitle">Log in</h2>
+      <p class="sub" data-i18n="loginSub">Choose your organization type, then sign in.</p>
 
       <div class="role-select">
-        <button type="button" class="role-btn active" id="roleNgo">NGO / Ministry</button>
-        <button type="button" class="role-btn" id="rolePlatform">Recruitment Platform</button>
+        <button type="button" class="role-btn active" id="roleNgo" data-i18n="roleNgoBtn">NGO / Ministry</button>
+        <button type="button" class="role-btn" id="rolePlatform" data-i18n="rolePlatformBtn">Recruitment Platform</button>
       </div>
 
       <form id="loginForm">
         <div class="field">
-          <label for="email">Work email</label>
+          <label for="email" data-i18n="emailLabel">Work email</label>
           <input type="email" id="email" placeholder="you@organization.org" autocomplete="email">
         </div>
         <div class="field">
-          <label for="password">Password</label>
+          <label for="password" data-i18n="passwordLabel">Password</label>
           <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
         </div>
-        <div class="form-error" id="loginError">Enter your work email and password to continue.</div>
-        <button type="submit" class="btn btn-primary" id="loginBtn">Log in</button>
+        <div class="form-error" id="loginError" data-i18n="loginErrorDefault">Enter your work email and password to continue.</div>
+        <button type="submit" class="btn btn-primary" id="loginBtn" data-i18n="loginBtnText">Log in</button>
       </form>
 
-      <p class="formside-foot">Don't have access yet? <a href="about.html">Contact your TrustLine partnership lead</a></p>
+      <p class="formside-foot"><span data-i18n="noAccessText">Don't have access yet?</span> <a href="about.html" data-i18n="contactLink">Contact your TrustLine partnership lead</a></p>
     </div>
   </div>
 </main>
 <script>
   const API_BASE = "http://localhost:4000/api";
+
+  const TRANSLATIONS = {
+    en: {
+      dir: "ltr",
+      heroHeadline: "Built for the people who verify at scale.",
+      heroLede: "One login, two very different toolsets — depending on which side of the recruitment chain you're on.",
+      ngoTitle: "NGOs & labor ministries",
+      ngoDesc: "Review worker-submitted reports, track fraud by corridor, export for policy work.",
+      platformTitle: "Recruitment platforms",
+      platformDesc: "Bulk-verify your registered agents and generate a \"TrustLine Verified\" badge.",
+      loginTitle: "Log in",
+      loginSub: "Choose your organization type, then sign in.",
+      roleNgoBtn: "NGO / Ministry",
+      rolePlatformBtn: "Recruitment Platform",
+      emailLabel: "Work email",
+      passwordLabel: "Password",
+      loginErrorDefault: "Enter your work email and password to continue.",
+      loginBtnText: "Log in",
+      noAccessText: "Don't have access yet?",
+      contactLink: "Contact your TrustLine partnership lead",
+      langToggleLabel: "العربية",
+    },
+    ar: {
+      dir: "rtl",
+      heroHeadline: "صُمم لمن يتحققون على نطاق واسع.",
+      heroLede: "تسجيل دخول واحد، ومجموعتا أدوات مختلفتان تمامًا — حسب جانبك في سلسلة التوظيف.",
+      ngoTitle: "المنظمات غير الحكومية ووزارات العمل",
+      ngoDesc: "راجع البلاغات المقدمة من العمال، وتتبّع الاحتيال حسب الممر، وصدّر البيانات لأغراض السياسات.",
+      platformTitle: "منصات التوظيف",
+      platformDesc: "تحقق بالجملة من وكلائك المسجلين وأنشئ شارة \"موثّق من TrustLine\".",
+      loginTitle: "تسجيل الدخول",
+      loginSub: "اختر نوع مؤسستك، ثم سجّل الدخول.",
+      roleNgoBtn: "منظمة / وزارة",
+      rolePlatformBtn: "منصة توظيف",
+      emailLabel: "البريد الإلكتروني للعمل",
+      passwordLabel: "كلمة المرور",
+      loginErrorDefault: "أدخل بريدك الإلكتروني وكلمة المرور للمتابعة.",
+      loginBtnText: "تسجيل الدخول",
+      noAccessText: "ليس لديك وصول بعد؟",
+      contactLink: "تواصل مع مسؤول الشراكات في TrustLine",
+      langToggleLabel: "English",
+    },
+  };
+
+  let currentLang = "en";
+
+  function applyLanguage() {
+    const dict = TRANSLATIONS[currentLang];
+    document.getElementById("htmlRoot").setAttribute("lang", currentLang);
+    document.getElementById("htmlRoot").setAttribute("dir", dict.dir);
+    document.querySelectorAll("[data-i18n]").forEach((el) => {
+      const key = el.getAttribute("data-i18n");
+      if (dict[key]) el.textContent = dict[key];
+    });
+    document.getElementById("langToggle").textContent = dict.langToggleLabel;
+  }
+
+  document.getElementById("langToggle").addEventListener("click", () => {
+    currentLang = currentLang === "en" ? "ar" : "en";
+    applyLanguage();
+  });
 
   const roleNgo = document.getElementById("roleNgo");
   const rolePlatform = document.getElementById("rolePlatform");
@@ -215,7 +277,7 @@
   const passwordInput = document.getElementById("password");
 
   /* Calls the real backend login endpoint. Note: this endpoint currently
-     issues a token for ANY non-empty email/password (see backend/src/routes/auth.js
+     issues a token for ANY non-empty email/password (see src/routes/auth.js
      for why — no real account table is populated yet). The token IS real
      and DOES get checked by the protected NGO/platform routes; only the
      credential check itself is a stub. */

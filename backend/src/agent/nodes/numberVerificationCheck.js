@@ -1,5 +1,5 @@
 // backend/src/agent/nodes/numberVerificationCheck.js
-const { verifyNumber } = require("../../services/camaraClient");
+const { verifyNumber, describeSignalFailure } = require("../../services/camaraClient");
 
 /**
  * LangGraph node: numberVerificationCheck
@@ -17,7 +17,7 @@ async function numberVerificationCheck(state) {
       reasoningTrace: [
         {
           step: "numberVerificationCheck",
-          detail: `Number Verification check failed: ${JSON.stringify(result.error)}`,
+          detail: `Number Verification check unavailable (${describeSignalFailure(result.error)}) — treated as inconclusive, not a red flag.`,
           timestamp: new Date().toISOString(),
         },
       ],

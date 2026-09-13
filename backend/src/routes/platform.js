@@ -1,7 +1,7 @@
 const express = require("express");
 const { requireAuth } = require("../middleware/auth");
 const { runVerification } = require("../agent");
-const { getRecentLogs } = require("../services/dbService");
+const { getRecentLogs, isRecruiterVerified } = require("../services/dbService");
 
 const router = express.Router();
 
@@ -81,6 +81,34 @@ router.get("/badge/:phoneNumber", requireAuth(["platform_account"]), async (req,
     eligible,
     badgeText: eligible ? "TrustLine Verified" : "Not Verified",
   });
+});
+
+/**
+ * GET /api/platform/badge-image/:phoneNumber
+ * PUBLIC, no auth — this is the actual image a recruiter embeds on their
+ * job listing (<img src="...">), so it must be fetchable by anyone
+ * browsing that listing, not gated behind a platform login.
+ *
+ * Tied to real recruiter registration status (isRecruiterVerified — see
+ * routes/recruiter.js), not a fresh re-run of the worker-verification
+ * agent, since "has this recruiter proved they own this number" is the
+ * actual claim a badge should make.
+ */
+router.get("/badge-image/:phoneNumber", async (req, res) => {
+  const verifiedAt = await isRecruiterVerified(req.params.phoneNumber);
+  const verified = Boolean(verifiedAt);
+
+  const fill = verified ? "#1FA398" : "#8a8f98";
+  const label = verified ? "TrustLine Verified" : "Not Yet Verified";
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="180" height="36" viewBox="0 0 180 36">
+  <rect width="180" height="36" rx="6" fill="${fill}"/>
+  <text x="90" y="23" font-family="Arial, sans-serif" font-size="13" font-weight="600" fill="#ffffff" text-anchor="middle">${label}</text>
+</svg>`;
+
+  res.setHeader("Content-Type", "image/svg+xml");
+  res.setHeader("Cache-Control", "public, max-age=300"); // 5 min — status can change if a recruiter registers
+  res.send(svg);
 });
 
 module.exports = router;

@@ -6,7 +6,7 @@ const express = require("express");
 // contract documented in agent/index.js, nothing below needs to change.
 const { runVerification } = require("../agent");
 
-const { logVerdict, submitWorkerReport } = require("../services/dbService");
+const { logVerdict, submitWorkerReport, getVerifiedReportCount } = require("../services/dbService");
 const { verifyRateLimiter } = require("../middleware/rateLimit");
 
 const router = express.Router();
@@ -54,6 +54,17 @@ router.post("/report", async (req, res) => {
   }
   await submitWorkerReport(phoneNumber, details);
   return res.status(201).json({ status: "received" });
+});
+
+/**
+ * GET /api/verify/stats
+ * Public, no auth — surfaces the "the agent gets smarter as more reports
+ * come in" feedback loop as a real number. Deliberately exposes only an
+ * aggregate count, never phone numbers or report content.
+ */
+router.get("/stats", async (req, res) => {
+  const verifiedReportCount = await getVerifiedReportCount();
+  res.json({ verifiedReportCount });
 });
 
 module.exports = router;

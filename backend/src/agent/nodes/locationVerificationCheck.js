@@ -1,5 +1,5 @@
 // backend/src/agent/nodes/locationVerificationCheck.js
-const { verifyLocation } = require("../../services/camaraClient");
+const { verifyLocation, describeSignalFailure } = require("../../services/camaraClient");
 
 /**
  * Minimal region → coordinates lookup for common Gulf/MENA recruitment
@@ -64,7 +64,7 @@ async function locationVerificationCheck(state) {
       reasoningTrace: [
         {
           step: "locationVerificationCheck",
-          detail: `Location Verification check failed: ${JSON.stringify(result.error)}`,
+          detail: `Location Verification check unavailable (${describeSignalFailure(result.error)}) — treated as inconclusive, not a red flag.`,
           timestamp: new Date().toISOString(),
         },
       ],

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" id="htmlRoot">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -253,28 +253,31 @@
     TrustLine
   </a>
   <nav>
-    <a class="navlink" href="about.html">About</a>
-    <a class="navlink" href="about.html#how">How it works</a>
-    <a class="btn btn-ghost-light" href="login.html">For organizations</a>
+    <a class="navlink" href="about.html" data-i18n="navAbout">About</a>
+    <a class="navlink" href="about.html#how" data-i18n="navHow">How it works</a>
+    <a class="btn btn-ghost-light" href="login.html" data-i18n="navOrgs">For organizations</a>
+    <button class="btn btn-ghost-light" id="langToggle" style="margin-left:8px;" type="button">العربية</button>
   </nav>
 </header>
 
 <!-- TOOL -->
 <section class="tool">
   <div class="wrap">
-    <p class="lede">For workers and families checking a job offer</p>
-    <h1 class="tool-h">Check a number before you trust it.</h1>
-    <p class="sub">Enter the recruiter's number below. No account, no fee, and it works even before you've paid anything or agreed to anything.</p>
+    <p class="lede" data-i18n="lede">For workers and families checking a job offer</p>
+    <h1 class="tool-h" data-i18n="headline">Check a number before you trust it.</h1>
+    <p class="sub" data-i18n="subhead">Enter the recruiter's number below. No account, no fee, and it works even before you've paid anything or agreed to anything.</p>
 
     <div class="ticket-card">
       <div class="ticket-main">
-        <div class="verify-label">Phone number</div>
+        <div class="verify-label" data-i18n="fieldLabel">Phone number</div>
         <div class="verify-row">
           <input class="verify-input" id="phoneInput" type="tel" placeholder="+971 5X XXX XXXX" autocomplete="tel">
-          <button class="btn btn-primary" id="verifyBtn" style="padding:0 22px;">Verify</button>
+          <button class="btn btn-primary" id="verifyBtn" style="padding:0 22px;" data-i18n="verifyBtn">Verify</button>
         </div>
-        <div class="verify-error" id="verifyError">Enter a number with a country code, e.g. +971501234567.</div>
-        <div class="verify-hint">Include the country code · Works with numbers from any country</div>
+        <div class="verify-error" id="verifyError" data-i18n="verifyError">Enter a number with a country code, e.g. +971501234567.</div>
+        <div class="verify-hint" data-i18n="verifyHint">Include the country code · Works with numbers from any country</div>
+        <div class="verify-hint" id="feedbackLoopStat" style="margin-top:4px; display:none;"></div>
+
 
         <div class="verdict-panel" id="verdictPanel">
           <div class="verdict-label" id="verdictLabel">—</div>
@@ -295,6 +298,17 @@
             <button class="btn btn-primary" id="reportSubmit" style="margin-top:10px; padding:10px 18px; font-size:13px;">Submit report</button>
             <div class="report-success" id="reportSuccess">Thanks — this has been added for NGO review.</div>
           </div>
+
+          <button class="trace-toggle" id="checklistToggle" style="margin-top:14px;">
+            <span id="checklistToggleText" data-i18n="checklistToggle">Before you travel — safety checklist</span> <span id="checklistArrow">→</span>
+          </button>
+          <div class="trace-list" id="checklistList">
+            <div class="trace-item"><span class="step">Contract</span><span class="detail">Get your employment contract in writing before you travel — verbal promises aren't enforceable.</span></div>
+            <div class="trace-item"><span class="step">Fees</span><span class="detail">Legitimate recruiters in most countries cannot legally charge you a placement fee — confirm your country's rules before paying anything.</span></div>
+            <div class="trace-item"><span class="step">Embassy</span><span class="detail">Save your destination country's embassy or consulate contact info before you leave — write it down, don't rely only on your phone.</span></div>
+            <div class="trace-item"><span class="step">Family contact</span><span class="detail">Give a trusted family member your flight details, employer's name, and address at your destination.</span></div>
+            <div class="trace-item"><span class="step">Passport</span><span class="detail">Keep your passport in your own possession — it's illegal in most countries for an employer to hold it for you.</span></div>
+          </div>
         </div>
       </div>
 
@@ -304,6 +318,36 @@
         <div class="stub-label">RESULT</div>
         <div class="stamp" id="stamp">Not<br>checked</div>
         <div id="demoBadge" style="display:none; margin-top:8px; font-size:11px; font-weight:600; color:var(--amber); text-align:center; letter-spacing:0.02em;">⚠ DEMO DATA — backend unreachable</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARE -->
+<section class="verify-tool">
+  <div class="wrap" style="max-width:720px;">
+    <p class="lede" data-i18n="compareLede">Got more than one number for the same job?</p>
+    <h1 class="tool-h" style="font-size:24px;" data-i18n="compareHeadline">Compare recruiters side by side.</h1>
+    <p class="sub" data-i18n="compareSubhead">Some scams involve several people contacting you about the same posting. Check up to three numbers at once to spot the pattern.</p>
+
+    <div class="ticket-card" style="flex-direction:column; gap:0;">
+      <div class="ticket-main" style="width:100%;">
+        <div class="verify-label">Numbers to compare</div>
+        <div id="compareInputs">
+          <div class="verify-row" style="margin-bottom:8px;">
+            <input class="verify-input" type="tel" placeholder="+971 5X XXX XXXX" data-compare-input>
+          </div>
+          <div class="verify-row" style="margin-bottom:8px;">
+            <input class="verify-input" type="tel" placeholder="+971 5X XXX XXXX (optional)" data-compare-input>
+          </div>
+          <div class="verify-row" style="margin-bottom:8px;">
+            <input class="verify-input" type="tel" placeholder="+971 5X XXX XXXX (optional)" data-compare-input>
+          </div>
+        </div>
+        <button class="btn btn-primary" id="compareBtn" style="margin-top:6px;">Compare numbers</button>
+        <div class="verify-error" id="compareError">Enter at least two numbers to compare.</div>
+
+        <div id="compareResults" style="margin-top:20px;"></div>
       </div>
     </div>
   </div>
@@ -322,6 +366,25 @@
     </div>
   </div>
 </section>
+
+<!-- WHATSAPP -->
+<section class="sms">
+  <div class="wrap">
+    <div>
+      <h2>Or check a number without ever leaving WhatsApp.</h2>
+      <p>Message TrustLine's WhatsApp number directly — the same verification, the same reasoning, right where the recruiter first messaged you.</p>
+    </div>
+    <div class="phone-mock">
+      <div class="bubble out">+971 50 123 4567</div>
+      <div class="bubble">*TrustLine Verdict: ✅ LOW RISK*
+
+No red flags found across available signals.
+
+_Reply with another number to check someone else._</div>
+    </div>
+  </div>
+</section>
+
 
 <footer>
   <div class="wrap">
@@ -471,6 +534,59 @@
   const reportSuccess = document.getElementById("reportSuccess");
 
   const RISK_LABELS = { HIGH: "High risk", MEDIUM: "Caution", LOW: "Low risk" };
+  const RISK_LABELS_AR = { HIGH: "خطر مرتفع", MEDIUM: "تحذير", LOW: "خطر منخفض" };
+
+  const TRANSLATIONS = {
+    en: {
+      dir: "ltr",
+      navAbout: "About", navHow: "How it works", navOrgs: "For organizations",
+      lede: "For workers and families checking a job offer",
+      headline: "Check a number before you trust it.",
+      subhead: "Enter the recruiter's number below. No account, no fee, and it works even before you've paid anything or agreed to anything.",
+      fieldLabel: "Phone number", verifyBtn: "Verify",
+      verifyError: "Enter a number with a country code, e.g. +971501234567.",
+      verifyHint: "Include the country code · Works with numbers from any country",
+      checklistToggle: "Before you travel — safety checklist",
+      compareLede: "Got more than one number for the same job?",
+      compareHeadline: "Compare recruiters side by side.",
+      compareSubhead: "Some scams involve several people contacting you about the same posting. Check up to three numbers at once to spot the pattern.",
+      langToggleLabel: "العربية",
+    },
+    ar: {
+      dir: "rtl",
+      navAbout: "حول", navHow: "كيف يعمل", navOrgs: "للمؤسسات",
+      lede: "للعمال والعائلات الذين يتحققون من عرض عمل",
+      headline: "تحقّق من الرقم قبل أن تثق به.",
+      subhead: "أدخل رقم هاتف المجنِّد أدناه. بدون حساب، وبدون رسوم، ويعمل حتى قبل أن تدفع أي شيء أو توافق على أي شيء.",
+      fieldLabel: "رقم الهاتف", verifyBtn: "تحقّق",
+      verifyError: "أدخل رقمًا مع رمز الدولة، مثال: +971501234567.",
+      verifyHint: "أدخل رمز الدولة · يعمل مع أرقام من أي بلد",
+      checklistToggle: "قبل السفر — قائمة السلامة",
+      compareLede: "هل لديك أكثر من رقم لنفس الوظيفة؟",
+      compareHeadline: "قارن بين المجنِّدين جنبًا إلى جنب.",
+      compareSubhead: "تتضمن بعض عمليات الاحتيال عدة أشخاص يتواصلون معك بخصوص نفس الإعلان. تحقق من ثلاثة أرقام في وقت واحد لملاحظة النمط.",
+      langToggleLabel: "English",
+    },
+  };
+
+  let currentLang = "en";
+
+  function applyLanguage() {
+    const dict = TRANSLATIONS[currentLang];
+    document.getElementById("htmlRoot").setAttribute("lang", currentLang);
+    document.getElementById("htmlRoot").setAttribute("dir", dict.dir);
+    document.querySelectorAll("[data-i18n]").forEach((el) => {
+      const key = el.getAttribute("data-i18n");
+      if (dict[key]) el.textContent = dict[key];
+    });
+    document.getElementById("langToggle").textContent = dict.langToggleLabel;
+  }
+
+  document.getElementById("langToggle").addEventListener("click", () => {
+    currentLang = currentLang === "en" ? "ar" : "en";
+    applyLanguage();
+  });
+
   const RISK_STAMP = { HIGH: "High<br>risk", MEDIUM: "Caution", LOW: "Low<br>risk" };
   const RISK_CLASS = { HIGH: "risk-high", MEDIUM: "risk-medium", LOW: "risk-low" };
 
@@ -500,8 +616,17 @@
 
     stamp.className = "stamp " + (RISK_CLASS[result.riskLevel] || "risk-medium");
     stamp.innerHTML = RISK_STAMP[result.riskLevel] || result.riskLevel;
-    verdictLabel.textContent = RISK_LABELS[result.riskLevel] || result.riskLevel;
+    const labels = currentLang === "ar" ? RISK_LABELS_AR : RISK_LABELS;
+    verdictLabel.textContent = labels[result.riskLevel] || result.riskLevel;
+    // The reasoning text itself is generated by the backend's AI model in
+    // English regardless of UI language — translating it would need a real
+    // translation service, out of scope here. Being upfront about that
+    // rather than silently leaving Arabic-speaking users confused why this
+    // one piece of text didn't translate.
     verdictExplain.textContent = result.explanation;
+    if (currentLang === "ar") {
+      verdictExplain.textContent += " (بالإنجليزية)";
+    }
 
     traceList.innerHTML = (result.reasoningTrace || []).map(t =>
       `<div class="trace-item"><span class="step">${t.step}</span><span class="detail">${t.detail}</span></div>`
@@ -523,6 +648,17 @@
     traceArrow.textContent = showing ? "↑" : "→";
   });
 
+  const checklistToggle = document.getElementById("checklistToggle");
+  const checklistToggleText = document.getElementById("checklistToggleText");
+  const checklistArrow = document.getElementById("checklistArrow");
+  const checklistList = document.getElementById("checklistList");
+
+  checklistToggle.addEventListener("click", () => {
+    const showing = checklistList.classList.toggle("show");
+    checklistToggleText.textContent = showing ? "Hide safety checklist" : "Before you travel — safety checklist";
+    checklistArrow.textContent = showing ? "↑" : "→";
+  });
+
   reportToggle.addEventListener("click", () => {
     reportForm.classList.toggle("show");
   });
@@ -538,6 +674,71 @@
     reportDetail.value = "";
   });
 
+  // Feedback loop: shows the agent improving over time as NGOs verify
+  // more worker reports — a real number from the database, not a static claim.
+  (async function loadFeedbackLoopStat() {
+    try {
+      const res = await fetch(`${API_BASE}/verify/stats`);
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.verifiedReportCount > 0) {
+        const el = document.getElementById("feedbackLoopStat");
+        el.textContent = `${data.verifiedReportCount} NGO-verified report${data.verifiedReportCount === 1 ? "" : "s"} ${data.verifiedReportCount === 1 ? "has" : "have"} already sharpened this system's detection.`;
+        el.style.display = "block";
+      }
+    } catch (err) {
+      // Silently skip — this is a nice-to-have stat, not core functionality.
+    }
+  })();
+
+  // Compare multiple recruiters: reuses the exact same checkNumber() call
+  // as the single-number flow above — same real backend, same demo
+  // fallback, just run for 2-3 numbers and rendered side by side.
+  const compareBtn = document.getElementById("compareBtn");
+  const compareError = document.getElementById("compareError");
+  const compareResults = document.getElementById("compareResults");
+
+  function riskColor(riskLevel) {
+    if (riskLevel === "HIGH") return "var(--red)";
+    if (riskLevel === "MEDIUM") return "var(--amber)";
+    return "var(--green)";
+  }
+
+  compareBtn.addEventListener("click", async () => {
+    const inputs = Array.from(document.querySelectorAll("[data-compare-input]"));
+    const numbers = inputs.map(i => normalizePhoneNumber(i.value)).filter(Boolean);
+
+    if (numbers.length < 2) {
+      compareError.classList.add("show");
+      return;
+    }
+    compareError.classList.remove("show");
+    compareBtn.disabled = true;
+    compareBtn.textContent = "Comparing…";
+    compareResults.innerHTML = "";
+
+    const results = await Promise.all(numbers.map(async (n) => ({ number: n, result: await checkNumber(n) })));
+
+    compareResults.innerHTML = `<table style="width:100%; border-collapse:collapse;">
+      <thead><tr>
+        <th style="text-align:left; padding:8px 6px; border-bottom:1px solid var(--line-dark); font-size:12.5px; color:var(--ink-dim);">Number</th>
+        <th style="text-align:left; padding:8px 6px; border-bottom:1px solid var(--line-dark); font-size:12.5px; color:var(--ink-dim);">Risk</th>
+        <th style="text-align:left; padding:8px 6px; border-bottom:1px solid var(--line-dark); font-size:12.5px; color:var(--ink-dim);">Why</th>
+      </tr></thead>
+      <tbody>
+        ${results.map(({ number, result }) => `
+          <tr>
+            <td style="padding:10px 6px; border-bottom:1px solid var(--line-dark); font-size:13.5px; font-family:'IBM Plex Mono',monospace;">${number}</td>
+            <td style="padding:10px 6px; border-bottom:1px solid var(--line-dark); font-size:13.5px; font-weight:600; color:${riskColor(result.riskLevel)};">${result.riskLevel}</td>
+            <td style="padding:10px 6px; border-bottom:1px solid var(--line-dark); font-size:13px; color:var(--ink-dim);">${result.explanation}</td>
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>`;
+
+    compareBtn.disabled = false;
+    compareBtn.textContent = "Compare numbers";
+  });
 
 </script>
 

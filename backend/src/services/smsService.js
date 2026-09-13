@@ -39,10 +39,47 @@ async function sendSms(toNumber, body) {
   return { sid: message.sid, to: toNumber };
 }
 
+// Twilio's WhatsApp Business API — uses the SAME account/client as SMS,
+// just with numbers prefixed "whatsapp:". This works today against
+// Twilio's WhatsApp sandbox for testing, without needing Meta's own
+// business verification process (which takes days). To go from sandbox
+// to a real production WhatsApp number, you'd register that number with
+// Twilio's WhatsApp onboarding — the code below doesn't change either way.
+const TWILIO_WHATSAPP_FROM = process.env.TWILIO_WHATSAPP_FROM; // e.g. "whatsapp:+14155238886" for the sandbox
+
+async function sendWhatsApp(toNumber, body) {
+  const toWhatsApp = toNumber.startsWith("whatsapp:") ? toNumber : `whatsapp:${toNumber}`;
+
+  if (USE_MOCK || !TWILIO_WHATSAPP_FROM) {
+    // eslint-disable-next-line no-console
+    console.log(`[smsService MOCK] Would send WhatsApp to ${toWhatsApp}:\n${body}`);
+    return { mocked: true, to: toWhatsApp, body };
+  }
+
+  const message = await twilioClient.messages.create({
+    to: toWhatsApp,
+    from: TWILIO_WHATSAPP_FROM,
+    body,
+  });
+  return { sid: message.sid, to: toWhatsApp };
+}
+
 /** Formats a verdict into a short SMS-friendly message (no rich formatting, no links). */
 function formatVerdictForSms(verdict) {
   const riskWord = { LOW: "LOW RISK", MEDIUM: "MEDIUM RISK", HIGH: "HIGH RISK" }[verdict.riskLevel] || "UNKNOWN";
   return `TrustLine: ${riskWord}. ${verdict.reasoning}`.slice(0, 320); // keep it to ~2 SMS segments
 }
 
-module.exports = { sendSms, formatVerdictForSms, USE_MOCK };
+/** WhatsApp allows richer formatting and longer messages than SMS — no length cap needed. */
+function formatVerdictForWhatsApp(verdict) {
+  const riskWord = { LOW: "✅ LOW RISK", MEDIUM: "⚠️ CAUTION", HIGH: "🚨 HIGH RISK" }[verdict.riskLevel] || "UNKNOWN";
+  return `*TrustLine Verdict: ${riskWord}*\n\n${verdict.reasoning}\n\n_Reply with another number to check someone else._`;
+}
+
+module.exports = {
+  sendSms,
+  sendWhatsApp,
+  formatVerdictForSms,
+  formatVerdictForWhatsApp,
+  USE_MOCK,
+};
