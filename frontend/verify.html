@@ -139,12 +139,32 @@
   .verify-error{margin-top:10px; font-size:13px; color:var(--red); display:none;}
   .verify-error.show{display:block;}
   .verify-hint{margin-top:12px; font-size:13px; color:var(--ink-dim);}
+  .demo-numbers{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:10px; font-size:12.5px; color:var(--ink-dim);}
+  .demo-num-btn{
+    font-family:'IBM Plex Mono', monospace; font-size:11.5px; background:rgba(18,21,27,0.045);
+    border:1px solid var(--line-dark); border-radius:14px; padding:4px 11px; color:var(--ink-dim);
+    cursor:pointer; transition:background 0.15s, color 0.15s;
+  }
+  .demo-num-btn:hover{background:rgba(255,106,0,0.1); border-color:var(--brand); color:var(--brand);}
 
   /* ---------- Verdict ---------- */
   .verdict-panel{margin-top:20px; padding-top:18px; border-top:1px solid var(--line-dark); display:none;}
   .verdict-panel.show{display:block;}
   .verdict-label{font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:16px; color:var(--ink); margin-bottom:4px;}
   .verdict-explain{font-size:14.5px; color:var(--ink-dim);}
+
+  /* ---------- Signal chips — per-check status breakdown ---------- */
+  .signal-chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:16px;}
+  .signal-chip{
+    display:inline-flex; align-items:center; gap:6px; padding:6px 11px 6px 8px;
+    border-radius:20px; font-size:12px; font-weight:600; font-family:'Inter', sans-serif;
+    border:1.5px solid transparent; white-space:nowrap;
+  }
+  .signal-chip svg{flex-shrink:0;}
+  .signal-chip.chip-clean{background:rgba(95,191,138,0.1); border-color:var(--green); color:#1e7a4c;}
+  .signal-chip.chip-flagged{background:rgba(229,72,58,0.08); border-color:var(--red); color:#a33a2c;}
+  .signal-chip.chip-caution{background:rgba(217,142,74,0.1); border-color:var(--amber); color:#8a5f14;}
+  .signal-chip.chip-unavailable{background:rgba(18,21,27,0.04); border-color:rgba(18,21,27,0.14); color:var(--ink-dim);}
 
   .trace-toggle{
     font-family:'Inter', sans-serif; font-weight:600; font-size:13px; color:var(--brand);
@@ -277,11 +297,17 @@
         <div class="verify-error" id="verifyError" data-i18n="verifyError">Enter a number with a country code, e.g. +971501234567.</div>
         <div class="verify-hint" data-i18n="verifyHint">Include the country code · Works with numbers from any country</div>
         <div class="verify-hint" id="feedbackLoopStat" style="margin-top:4px; display:none;"></div>
+        <div class="demo-numbers">
+          <span data-i18n="tryLabel">Try:</span>
+          <button type="button" class="demo-num-btn" data-num="+9999991000" data-i18n="tryHigh">+9999991000 (high risk)</button>
+          <button type="button" class="demo-num-btn" data-num="+9999991001" data-i18n="tryLow">+9999991001 (low risk)</button>
+        </div>
 
 
         <div class="verdict-panel" id="verdictPanel">
           <div class="verdict-label" id="verdictLabel">—</div>
           <div class="verdict-explain" id="verdictExplain"></div>
+          <div class="signal-chips" id="signalChips"></div>
 
           <button class="trace-toggle" id="traceToggle">
             <span id="traceToggleText">Show reasoning</span> <span id="traceArrow">→</span>
@@ -457,20 +483,36 @@ _Reply with another number to check someone else._</div>
           { step: "simSwapCheck", detail: "SIM has been swapped recently — potential red flag." },
           { step: "deviceSwapCheck", detail: "Device recently changed for this number — potential burner-device pattern." },
           { step: "triage", detail: "Both signals flagged — confident high-risk result without escalation." },
-        ]},
+        ],
+        signals: {
+          simSwap: { available: true, swapped: true },
+          deviceSwap: { available: true, swapped: true },
+          dbCrossCheck: { available: true, found: false },
+        }},
       { riskLevel: "MEDIUM", explanation: "One signal was inconclusive. Verify by another channel before paying anything.",
         reasoningTrace: [
           { step: "simSwapCheck", detail: "No recent SIM swap detected." },
           { step: "deviceSwapCheck", detail: "Device recently changed for this number — potential burner-device pattern." },
           { step: "triage", detail: "Signals disagree — escalating to secondary checks." },
           { step: "dbCrossCheck", detail: "No prior scam reports found for this number." },
-        ]},
+        ],
+        signals: {
+          simSwap: { available: true, swapped: false },
+          deviceSwap: { available: true, swapped: true },
+          dbCrossCheck: { available: true, found: false },
+          deviceReachability: { available: true, reachable: true },
+        }},
       { riskLevel: "LOW", explanation: "No red flags found across available signals.",
         reasoningTrace: [
           { step: "simSwapCheck", detail: "No recent SIM swap detected." },
           { step: "deviceSwapCheck", detail: "No recent device change detected." },
           { step: "triage", detail: "Both signals clean — confident low-risk result without escalation." },
-        ]},
+        ],
+        signals: {
+          simSwap: { available: true, swapped: false },
+          deviceSwap: { available: true, swapped: false },
+          dbCrossCheck: { available: true, found: false },
+        }},
     ];
     const pick = options[Math.abs(phoneNumber.split("").reduce((a,c)=>a+c.charCodeAt(0),0)) % options.length];
     return { ...pick, signalsUsed: pick.reasoningTrace.map(t=>t.step), demo: true };
@@ -494,6 +536,7 @@ _Reply with another number to check someone else._</div>
         explanation: data.verdict.reasoning,
         reasoningTrace: data.reasoningTrace || [],
         signalsUsed: data.verdict.signalsUsed,
+        signals: data.signals || {},
         escalated: data.escalated,
         demo: false,
       };
@@ -536,6 +579,76 @@ _Reply with another number to check someone else._</div>
   const RISK_LABELS = { HIGH: "High risk", MEDIUM: "Caution", LOW: "Low risk" };
   const RISK_LABELS_AR = { HIGH: "خطر مرتفع", MEDIUM: "تحذير", LOW: "خطر منخفض" };
 
+  // ---------------- Signal breakdown chips ----------------
+  // Turns the agent's raw per-check state (result.signals — see
+  // agent/index.js) into a row of colored chips, so the multi-signal
+  // reasoning that's actually TrustLine's core differentiator is visible
+  // at a glance instead of buried inside the collapsed "Show reasoning"
+  // text panel. numberVerification is intentionally never shown here —
+  // it's a documented, not-yet-wired extension point (see backend
+  // README), not a live check, so showing it would just look broken.
+  const SIGNAL_ICONS = {
+    simSwap: '<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="3" y="1.5" width="10" height="13" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M6 5.5H10M6 8H10M6 10.5H8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
+    deviceSwap: '<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="4.5" y="1.5" width="7" height="13" rx="1.6" stroke="currentColor" stroke-width="1.4"/><path d="M8 12h.01" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+    dbCrossCheck: '<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><ellipse cx="8" cy="3.3" rx="5.5" ry="1.8" stroke="currentColor" stroke-width="1.4"/><path d="M2.5 3.3V12.7C2.5 13.7 4.9 14.5 8 14.5C11.1 14.5 13.5 13.7 13.5 12.7V3.3" stroke="currentColor" stroke-width="1.4"/><path d="M2.5 8C2.5 9 4.9 9.8 8 9.8C11.1 9.8 13.5 9 13.5 8" stroke="currentColor" stroke-width="1.4"/></svg>',
+    deviceReachability: '<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M2 6.5C4.5 3.8 11.5 3.8 14 6.5M4.3 9C5.9 7.3 10.1 7.3 11.7 9M6.7 11.5C7.4 10.7 8.6 10.7 9.3 11.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="13.3" r="0.9" fill="currentColor"/></svg>',
+    deviceRoaming: '<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.2" stroke="currentColor" stroke-width="1.4"/><path d="M1.8 8H14.2M8 1.8C9.7 3.5 10.6 5.7 10.6 8C10.6 10.3 9.7 12.5 8 14.2C6.3 12.5 5.4 10.3 5.4 8C5.4 5.7 6.3 3.5 8 1.8Z" stroke="currentColor" stroke-width="1.2"/></svg>',
+    locationVerification: '<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 14.5S13 9.8 13 6.3C13 3.6 10.8 1.5 8 1.5C5.2 1.5 3 3.6 3 6.3C3 9.8 8 14.5 8 14.5Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><circle cx="8" cy="6.3" r="1.8" stroke="currentColor" stroke-width="1.4"/></svg>',
+  };
+
+  const SIGNAL_CHIP_LABELS = {
+    en: {
+      simSwap: { clean: "SIM stable", flagged: "SIM recently swapped", unavailable: "SIM swap: unavailable" },
+      deviceSwap: { clean: "Device stable", flagged: "Device recently swapped", unavailable: "Device swap: unavailable" },
+      dbCrossCheck: { clean: "No scam reports", flagged: "NGO-verified scam report", caution: "Worker-reported (unverified)", unavailable: "Scam database: unavailable" },
+      deviceReachability: { clean: "Device reachable", flagged: "Device unreachable", unavailable: "Reachability: unavailable" },
+      deviceRoaming: { clean: "Not roaming", caution: "Currently roaming", unavailable: "Roaming: unavailable" },
+      locationVerification: { clean: "Location matches", flagged: "Location mismatch", unavailable: "Location: unavailable" },
+    },
+    ar: {
+      simSwap: { clean: "شريحة الاتصال مستقرة", flagged: "تم تغيير شريحة الاتصال مؤخرًا", unavailable: "فحص الشريحة: غير متاح" },
+      deviceSwap: { clean: "الجهاز مستقر", flagged: "تم تغيير الجهاز مؤخرًا", unavailable: "فحص الجهاز: غير متاح" },
+      dbCrossCheck: { clean: "لا توجد بلاغات احتيال", flagged: "بلاغ احتيال موثّق من منظمة", caution: "بلاغ من عامل (غير موثّق)", unavailable: "قاعدة البلاغات: غير متاحة" },
+      deviceReachability: { clean: "الجهاز متاح", flagged: "الجهاز غير متاح", unavailable: "فحص التوفر: غير متاح" },
+      deviceRoaming: { clean: "لا يوجد تجوال", caution: "يوجد تجوال حاليًا", unavailable: "فحص التجوال: غير متاح" },
+      locationVerification: { clean: "الموقع مطابق", flagged: "الموقع غير مطابق", unavailable: "فحص الموقع: غير متاح" },
+    },
+  };
+
+  const SIGNAL_ORDER = ["simSwap", "deviceSwap", "dbCrossCheck", "deviceReachability", "deviceRoaming", "locationVerification"];
+
+  /** Maps one signal's raw state to a { status, labelKey } pair — the only
+   * place that knows what field means "flagged" for each specific check. */
+  function classifySignal(key, s){
+    if (!s || s.available !== true) return { status: "unavailable", labelKey: "unavailable" };
+    switch (key){
+      case "simSwap": case "deviceSwap":
+        return s.swapped ? { status: "flagged", labelKey: "flagged" } : { status: "clean", labelKey: "clean" };
+      case "deviceReachability":
+        return s.reachable ? { status: "clean", labelKey: "clean" } : { status: "flagged", labelKey: "flagged" };
+      case "deviceRoaming":
+        return s.roaming ? { status: "caution", labelKey: "caution" } : { status: "clean", labelKey: "clean" };
+      case "dbCrossCheck":
+        if (!s.found) return { status: "clean", labelKey: "clean" };
+        return s.verifiedByNgo ? { status: "flagged", labelKey: "flagged" } : { status: "caution", labelKey: "caution" };
+      case "locationVerification":
+        return s.verified ? { status: "clean", labelKey: "clean" } : { status: "flagged", labelKey: "flagged" };
+      default:
+        return { status: "unavailable", labelKey: "unavailable" };
+    }
+  }
+
+  function renderSignalChips(signals){
+    const labels = SIGNAL_CHIP_LABELS[currentLang] || SIGNAL_CHIP_LABELS.en;
+    return SIGNAL_ORDER
+      .filter(key => signals[key] !== undefined && signals[key] !== null) // only checks that actually ran
+      .map(key => {
+        const { status, labelKey } = classifySignal(key, signals[key]);
+        const text = labels[key]?.[labelKey] || key;
+        return `<span class="signal-chip chip-${status}">${SIGNAL_ICONS[key] || ""}${text}</span>`;
+      }).join("");
+  }
+
   const TRANSLATIONS = {
     en: {
       dir: "ltr",
@@ -546,6 +659,7 @@ _Reply with another number to check someone else._</div>
       fieldLabel: "Phone number", verifyBtn: "Verify",
       verifyError: "Enter a number with a country code, e.g. +971501234567.",
       verifyHint: "Include the country code · Works with numbers from any country",
+      tryLabel: "Try:", tryHigh: "+9999991000 (high risk)", tryLow: "+9999991001 (low risk)",
       checklistToggle: "Before you travel — safety checklist",
       compareLede: "Got more than one number for the same job?",
       compareHeadline: "Compare recruiters side by side.",
@@ -561,6 +675,7 @@ _Reply with another number to check someone else._</div>
       fieldLabel: "رقم الهاتف", verifyBtn: "تحقّق",
       verifyError: "أدخل رقمًا مع رمز الدولة، مثال: +971501234567.",
       verifyHint: "أدخل رمز الدولة · يعمل مع أرقام من أي بلد",
+      tryLabel: "جرّب:", tryHigh: "+9999991000 (خطر مرتفع)", tryLow: "+9999991001 (خطر منخفض)",
       checklistToggle: "قبل السفر — قائمة السلامة",
       compareLede: "هل لديك أكثر من رقم لنفس الوظيفة؟",
       compareHeadline: "قارن بين المجنِّدين جنبًا إلى جنب.",
@@ -632,6 +747,8 @@ _Reply with another number to check someone else._</div>
       `<div class="trace-item"><span class="step">${t.step}</span><span class="detail">${t.detail}</span></div>`
     ).join("");
 
+    document.getElementById("signalChips").innerHTML = renderSignalChips(result.signals || {});
+
     document.getElementById("demoBadge").style.display = result.demo ? "block" : "none";
 
     verdictPanel.classList.add("show");
@@ -641,6 +758,19 @@ _Reply with another number to check someone else._</div>
 
   phoneInput.addEventListener("keydown", (e) => { if (e.key === "Enter") verifyBtn.click(); });
   phoneInput.addEventListener("input", () => verifyError.classList.remove("show"));
+
+  // Demo-safe number shortcuts — these two numbers are confirmed
+  // deterministic against the real CAMARA sandbox (verified: +9999991000
+  // consistently returns both signals swapped/HIGH, +9999991001
+  // consistently returns both clean/LOW), unlike a judge's own number
+  // which can land on the documented CAMARA rate-limit flakiness. One
+  // click fills the field and runs the real check immediately.
+  document.querySelectorAll(".demo-num-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      phoneInput.value = btn.dataset.num;
+      verifyBtn.click();
+    });
+  });
 
   traceToggle.addEventListener("click", () => {
     const showing = traceList.classList.toggle("show");

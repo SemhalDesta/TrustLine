@@ -437,6 +437,33 @@
   </div>
 </section>
 
+<!-- PRIVACY — real, built architecture (hashing + AES-256-GCM encryption +
+     retention purge, see backend/src/utils/privacy.js and dbService.js),
+     not aspirational copy. -->
+<section class="how" id="privacy">
+  <div class="wrap">
+    <div class="section-kicker" data-i18n="privacyKicker">PRIVACY BY DESIGN</div>
+    <h2 class="section-h" data-i18n="privacyH2">Your number is hashed and encrypted — never sitting in a spreadsheet.</h2>
+    <div class="steps">
+      <div class="step">
+        <span class="step-mark mono">01</span>
+        <h3 data-i18n="priv1H">One-way hashed lookups</h3>
+        <p data-i18n="priv1P">Numbers are matched by a cryptographic hash, not stored or searched in plaintext — a database leak alone can't expose them.</p>
+      </div>
+      <div class="step">
+        <span class="step-mark mono">02</span>
+        <h3 data-i18n="priv2H">Encrypted at rest</h3>
+        <p data-i18n="priv2P">The actual number is stored with AES-256-GCM encryption, decrypted only for the NGO or platform staff who need it to act on a report.</p>
+      </div>
+      <div class="step">
+        <span class="step-mark mono">03</span>
+        <h3 data-i18n="priv3H">Automatic retention limits</h3>
+        <p data-i18n="priv3P">Verification logs older than the configured retention window are purged automatically, not kept indefinitely.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ROLES — real navigation -->
 <section class="roles" id="orgs">
   <div class="wrap">
@@ -532,6 +559,14 @@
       agentP: "Every check runs the same evidence through the same reasoning, so the same number gets the same answer no matter who's asking.",
       signal1: "SIM swap history", signal2: "Device status", signal3: "Location match", signal4: "Scam reports",
       verdictOut: "CLEAR VERDICT",
+      privacyKicker: "PRIVACY BY DESIGN",
+      privacyH2: "Your number is hashed and encrypted — never sitting in a spreadsheet.",
+      priv1H: "One-way hashed lookups",
+      priv1P: "Numbers are matched by a cryptographic hash, not stored or searched in plaintext — a database leak alone can't expose them.",
+      priv2H: "Encrypted at rest",
+      priv2P: "The actual number is stored with AES-256-GCM encryption, decrypted only for the NGO or platform staff who need it to act on a report.",
+      priv3H: "Automatic retention limits",
+      priv3P: "Verification logs older than the configured retention window are purged automatically, not kept indefinitely.",
       rolesH2: "Built for three different jobs, one shared verdict.",
       rolesP: "Pick the one that's you — each has its own tools, not a shared inbox.",
       roleWorkerTag: "FOR WORKERS", roleWorkerH: "Check a recruiter's number",
@@ -570,6 +605,14 @@
       agentP: "يمر كل فحص بنفس الأدلة عبر نفس المنطق، بحيث يحصل نفس الرقم على نفس الإجابة بغض النظر عمن يسأل.",
       signal1: "تاريخ تبديل الشريحة", signal2: "حالة الجهاز", signal3: "تطابق الموقع", signal4: "بلاغات الاحتيال",
       verdictOut: "قرار واضح",
+      privacyKicker: "الخصوصية بالتصميم",
+      privacyH2: "رقمك مُجزّأ ومشفّر — لا يوجد أبدًا في جدول بيانات.",
+      priv1H: "بحث أحادي الاتجاه عبر التجزئة",
+      priv1P: "تتم مطابقة الأرقام عبر تجزئة تشفيرية، وليس تخزينها أو البحث فيها كنص عادي — تسرب قاعدة بيانات وحده لا يمكن أن يكشفها.",
+      priv2H: "مشفّر أثناء التخزين",
+      priv2P: "يُخزَّن الرقم الفعلي بتشفير AES-256-GCM، ولا يُفكّ تشفيره إلا لموظفي المنظمة أو المنصة الذين يحتاجونه للتعامل مع بلاغ.",
+      priv3H: "حدود احتفاظ تلقائية",
+      priv3P: "يتم حذف سجلات التحقق الأقدم من فترة الاحتفاظ المحددة تلقائيًا، وليست محفوظة إلى ما لا نهاية.",
       rolesH2: "صُمم لثلاث وظائف مختلفة، وقرار واحد مشترك.",
       rolesP: "اختر ما يناسبك — لكل منها أدواتها الخاصة، وليست صندوق وارد مشترك.",
       roleWorkerTag: "للعمال", roleWorkerH: "تحقّق من رقم المجنِّد",
@@ -618,7 +661,7 @@
   const io = new IntersectionObserver((entries)=>{
     entries.forEach(e=>{ if(e.isIntersecting && e.boundingClientRect.top < 100){ header.classList.add('dark-mode'); } });
   }, {rootMargin:'-40px 0px -85% 0px'});
-  const lightSections = [document.getElementById('how'), document.getElementById('orgs')];
+  const lightSections = [document.getElementById('how'), document.getElementById('privacy'), document.getElementById('orgs')];
   darkSections.forEach(s=> s && io.observe(s));
   const io2 = new IntersectionObserver((entries)=>{
     entries.forEach(e=>{ if(e.isIntersecting && e.boundingClientRect.top < 100){ header.classList.remove('dark-mode'); } });
@@ -656,7 +699,7 @@
     const targetCount = Math.max(200, Math.min(460, Math.floor((pageWidth * pageHeight) / 5400)));
     particles = Array.from({ length: targetCount }, () => ({
       x: Math.random() * pageWidth, y: Math.random() * pageHeight,
-      vx: (Math.random() - 0.5) * 0.45, vy: (Math.random() - 0.5) * 0.45,
+      vx: (Math.random() - 0.5) * 0.8, vy: (Math.random() - 0.5) * 0.8,
       r: Math.random() * 1.8 + 1.0, depth: Math.random() * 0.7 + 0.4,
     }));
   }
@@ -682,7 +725,15 @@
           p.vx += (dx / dist) * force * 0.02; p.vy += (dy / dist) * force * 0.02;
         }
       }
-      p.vx *= 0.99; p.vy *= 0.99;
+      // Ambient wander — without this, the 0.99 damping below decays
+      // velocity to an imperceptible crawl within a couple of seconds
+      // whenever the mouse isn't actively over the canvas (which is most
+      // of the time), making the whole layer look frozen. This constant
+      // small random nudge keeps every particle drifting at a steady,
+      // visible pace indefinitely, mouse or no mouse.
+      p.vx += (Math.random() - 0.5) * 0.03;
+      p.vy += (Math.random() - 0.5) * 0.03;
+      p.vx *= 0.995; p.vy *= 0.995;
       if (p.x < -20) p.x = pageWidth + 20;
       if (p.x > pageWidth + 20) p.x = -20;
       if (p.y < -20) p.y = pageHeight + 20;

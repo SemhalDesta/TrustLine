@@ -1,5 +1,16 @@
 const axios = require("axios");
 
+// Self-sufficient env loading: this file reads several CAMARA_* vars into
+// module-level consts below, evaluated once at require time. That's only
+// safe if .env has already been loaded by then — which depended on
+// server.js requiring config/env.js (the module that calls this) before
+// app.js's require chain reached this file. That ordering bug meant every
+// live CAMARA call silently ran with an undefined API key. Calling
+// dotenv.config() here too makes this module correct no matter what
+// requires it, or in what order. dotenv.config() is safe to call more than
+// once — later calls are no-ops for keys already set.
+require("dotenv").config();
+
 const CAMARA_RAPIDAPI_KEY = process.env.CAMARA_RAPIDAPI_KEY;
 const CAMARA_HOSTNAME = "network-as-code.p-eu.apihub.nokia.io";
 const CAMARA_HOST_HEADER = "network-as-code.nokia.rapidapi.com";

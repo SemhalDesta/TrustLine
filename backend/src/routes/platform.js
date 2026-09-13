@@ -20,12 +20,30 @@ router.get("/usage", requireAuth(["platform_account"]), async (req, res) => {
   const distinctNumbers = new Set(logs.map((l) => l.phone_number || l.phoneNumber));
   const verifiedCount = logs.filter((l) => (l.risk_level || l.verdict?.riskLevel) === "LOW").length;
 
+  // 7-day check-volume trend (bulk + individual combined, since both write
+  // to the same audit log) — computed from the same `logs` fetch above so
+  // the dashboard's trend chart reflects real activity instead of a
+  // hardcoded sample array.
+  const days = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    days.push(d.toISOString().slice(0, 10));
+  }
+  const countsByDay = Object.fromEntries(days.map((d) => [d, 0]));
+  logs.forEach((l) => {
+    const day = new Date(l.created_at || l.at).toISOString().slice(0, 10);
+    if (day in countsByDay) countsByDay[day] += 1;
+  });
+  const trend = days.map((day) => ({ date: day, count: countsByDay[day] }));
+
   res.json({
     registered: distinctNumbers.size,
     verified: verifiedCount,
     pending: 0, // no "pending verification" concept yet — every check completes synchronously
     checksThisMonth: logs.length,
     planLimit: 200, // static placeholder until billing/plans are modeled
+    trend,
   });
 });
 

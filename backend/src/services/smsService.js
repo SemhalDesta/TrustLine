@@ -33,7 +33,7 @@ async function sendSms(toNumber, body) {
 
   const message = await twilioClient.messages.create({
     to: toNumber,
-    from: env.twilio.fromNumber,
+    from: env.twilio.smsFromNumber,
     body,
   });
   return { sid: message.sid, to: toNumber };
@@ -45,7 +45,11 @@ async function sendSms(toNumber, body) {
 // business verification process (which takes days). To go from sandbox
 // to a real production WhatsApp number, you'd register that number with
 // Twilio's WhatsApp onboarding — the code below doesn't change either way.
-const TWILIO_WHATSAPP_FROM = process.env.TWILIO_WHATSAPP_FROM; // e.g. "whatsapp:+14155238886" for the sandbox
+//
+// NOTE: this is a DIFFERENT number from the plain-SMS sender above — a
+// WhatsApp send must go "from" a WhatsApp-enabled number (the shared
+// sandbox number below during testing), never the SMS-only number.
+const TWILIO_WHATSAPP_FROM = env.twilio.whatsappFromNumber; // e.g. "whatsapp:+14155238886" for the sandbox
 
 async function sendWhatsApp(toNumber, body) {
   const toWhatsApp = toNumber.startsWith("whatsapp:") ? toNumber : `whatsapp:${toNumber}`;

@@ -148,6 +148,23 @@
     background:rgba(95,191,138,0.1); border:1.5px solid var(--green); color:#1e7a4c;
     font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:14px;
   }
+  .verified-badge.not-verified{
+    background:rgba(138,143,152,0.1); border-color:#8a8f98; color:#5c6169;
+  }
+  .badge-status-note{font-size:12.5px; color:var(--ink-dim); text-align:center; max-width:34ch;}
+  .link-box{
+    width:100%; display:flex; align-items:center; gap:8px;
+    background:var(--paper); border:1px solid var(--line-dark); border-radius:8px; padding:10px 12px;
+  }
+  .link-box input{
+    flex:1; border:none; background:none; font-family:'IBM Plex Mono', monospace; font-size:12px;
+    color:var(--ink); min-width:0;
+  }
+  .link-box input:focus{outline:none;}
+  .link-box .copy-btn{
+    position:static; background:var(--void); color:#EFF1EA; flex-shrink:0;
+  }
+  .share-label{font-size:11.5px; font-weight:600; color:var(--ink-dim); text-transform:uppercase; letter-spacing:0.03em; align-self:flex-start;}
   .embed-box{
     width:100%; background:var(--void); color:#8fe3b8; font-family:'IBM Plex Mono', monospace; font-size:12px;
     border-radius:8px; padding:14px 16px; position:relative; line-height:1.6; overflow-x:auto; white-space:pre;
@@ -293,7 +310,6 @@
         </div>
         <div class="num" id="statVerified">—</div>
         <div class="lbl" data-i18n="statVerifiedLbl">Verified &amp; badge-eligible</div>
-        <div class="trend up" data-i18n="statVerifiedTrend">↑ 3 this week</div>
       </div>
       <div class="stat-card" style="--stat-color:#D98E4A;">
         <div class="icon" style="color:#D98E4A;">
@@ -347,17 +363,12 @@
         <div class="badge-input">
           <label for="badgeInput" data-i18n="badgeLabel">Verified agent number</label>
           <input type="tel" id="badgeInput" placeholder="+971501234567" value="+971501234567">
-          <button class="btn btn-primary" id="badgeBtn" data-i18n="badgeBtnText">Generate embed code</button>
+          <button class="btn btn-primary" id="badgeBtn" data-i18n="badgeBtnText">Check status &amp; generate badge</button>
         </div>
-        <div class="badge-preview">
-          <div class="verified-badge">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.5L13.5 3.8V7.5C13.5 10.8 11.2 13.4 8 14.5C4.8 13.4 2.5 10.8 2.5 7.5V3.8L8 1.5Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M5.5 8L7.2 9.7L10.5 6.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            <span data-i18n="badgeVerifiedText">TrustLine Verified</span>
-          </div>
-          <div class="embed-box" id="embedBox">
-            <button class="copy-btn" id="copyBtn" data-i18n="copyBtnText">Copy</button>
-            &lt;img src="http://localhost:4000/api/platform/badge-image/+971501234567" alt="TrustLine Verified"&gt;
-          </div>
+        <div class="badge-preview" id="badgePreview" style="display:none;">
+          <!-- Populated live by checkAndRenderBadge() from a real
+               GET /api/recruiter/status call — never shown until that
+               check actually runs, and never hardcoded to "verified". -->
         </div>
       </div>
     </section>
@@ -436,7 +447,7 @@
       pageH1: "Platform verification &amp; usage",
       pageP: "Verify your registered agents and generate a badge you can display on legitimate listings.",
       statRegisteredLbl: "Registered numbers",
-      statVerifiedLbl: "Verified &amp; badge-eligible", statVerifiedTrend: "↑ 3 this week",
+      statVerifiedLbl: "Verified &amp; badge-eligible",
       statPendingLbl: "Pending verification", statUsageLbl: "Checks used this month",
       chart1H: "Checks over the last 7 days", chart1Sub: "Bulk and individual verifications combined",
       chart2H: "Registered number status", chart2Sub: "Across your full agent roster",
@@ -444,7 +455,14 @@
       bulkLabel: "Phone numbers", bulkHint: "Include the country code on each line. Results appear below once checked.",
       bulkBtnText: "Verify all",
       badgeH2: "Generate a verified badge", badgeLabel: "Verified agent number",
-      badgeBtnText: "Generate embed code", badgeVerifiedText: "TrustLine Verified", copyBtnText: "Copy",
+      badgeBtnText: "Check status &amp; generate badge", badgeCheckingText: "Checking…",
+      badgeVerifiedText: "TrustLine Verified", badgeNotVerifiedText: "Not Yet Verified", copyBtnText: "Copy",
+      badgeVerifiedNote: (n) => `Real, live check — ${n} has completed recruiter registration.`,
+      badgeNotVerifiedNote: "This number hasn't completed recruiter registration yet, so its badge will show \"Not Yet Verified\" until it does.",
+      badgeNotVerifiedLink: "Complete registration →",
+      badgeCheckFailed: "Couldn't reach the server to check this number.",
+      shareLinkLabel: "Shareable link — works anywhere, even where HTML can't be pasted",
+      embedCodeLabel: "Embed code — for your own website",
       numbersH2: "Registered numbers", loadingNumbers: "Loading registered numbers…",
       langToggleLabel: "العربية",
     },
@@ -456,7 +474,7 @@
       pageH1: "التحقق والاستخدام على المنصة",
       pageP: "تحقق من وكلائك المسجلين وأنشئ شارة يمكنك عرضها على الإعلانات الشرعية.",
       statRegisteredLbl: "الأرقام المسجلة",
-      statVerifiedLbl: "موثّقة ومؤهلة للشارة", statVerifiedTrend: "↑ 3 هذا الأسبوع",
+      statVerifiedLbl: "موثّقة ومؤهلة للشارة",
       statPendingLbl: "بانتظار التحقق", statUsageLbl: "الفحوصات هذا الشهر",
       chart1H: "الفحوصات خلال آخر 7 أيام", chart1Sub: "التحققات الجماعية والفردية مجتمعة",
       chart2H: "حالة الأرقام المسجلة", chart2Sub: "عبر قائمة وكلائك الكاملة",
@@ -464,7 +482,14 @@
       bulkLabel: "أرقام الهواتف", bulkHint: "أدخل رمز الدولة في كل سطر. تظهر النتائج أدناه بعد الفحص.",
       bulkBtnText: "تحقق من الكل",
       badgeH2: "إنشاء شارة موثّقة", badgeLabel: "رقم الوكيل الموثّق",
-      badgeBtnText: "إنشاء كود التضمين", badgeVerifiedText: "موثّق من TrustLine", copyBtnText: "نسخ",
+      badgeBtnText: "تحقق من الحالة وأنشئ الشارة", badgeCheckingText: "جارٍ التحقق…",
+      badgeVerifiedText: "موثّق من TrustLine", badgeNotVerifiedText: "غير موثّق بعد", copyBtnText: "نسخ",
+      badgeVerifiedNote: (n) => `فحص حقيقي ومباشر — أكمل ${n} تسجيل المُجنِّد.`,
+      badgeNotVerifiedNote: "لم يكمل هذا الرقم تسجيل المُجنِّد بعد، لذا ستظهر شارته كـ \"غير موثّق بعد\" حتى يفعل.",
+      badgeNotVerifiedLink: "أكمل التسجيل ←",
+      badgeCheckFailed: "تعذّر الوصول إلى الخادم للتحقق من هذا الرقم.",
+      shareLinkLabel: "رابط قابل للمشاركة — يعمل في أي مكان، حتى حيث لا يمكن لصق HTML",
+      embedCodeLabel: "كود التضمين — لموقعك الإلكتروني الخاص",
       numbersH2: "الأرقام المسجلة", loadingNumbers: "جارٍ تحميل الأرقام المسجلة…",
       langToggleLabel: "English",
     },
@@ -498,8 +523,8 @@
     { phoneNumber: "+971 50 555 6677", status: "verified", lastChecked: "2026-09-08T08:00:00Z" },
   ];
 
-  const MOCK_USAGE = { registered: 18, verified: 14, pending: 3, checksThisMonth: 62, planLimit: 200 };
   const MOCK_TREND = { labels: ["Tue","Wed","Thu","Fri","Sat","Sun","Mon"], values: [4, 9, 6, 12, 7, 3, 10] };
+  const MOCK_USAGE = { registered: 18, verified: 14, pending: 3, checksThisMonth: 62, planLimit: 200, trend: MOCK_TREND };
 
   const RISK_LABEL = { HIGH: "High risk", MEDIUM: "Caution", LOW: "Low risk" };
   const RISK_LABEL_AR = { HIGH: "خطر مرتفع", MEDIUM: "تحذير", LOW: "خطر منخفض" };
@@ -609,9 +634,21 @@
     container.innerHTML = `<table><thead><tr><th>${cols.number}</th><th>${cols.verdict}</th><th>${cols.explanation}</th></tr></thead><tbody>${rows}</tbody></table>`;
   }
 
-  function renderTrendChart(){
+  function renderTrendChart(usage){
     const el = document.getElementById("trendChart");
-    const values = MOCK_TREND.values, labels = MOCK_TREND.labels;
+    // usage.trend (real data: [{date, count}, ...], oldest to newest) comes
+    // from GET /api/platform/usage. Fall back to the labeled MOCK_TREND
+    // shape only if that field is somehow missing (e.g. an older cached
+    // response), so this never silently renders a sample as if it were real.
+    const weekdayFmt = currentLang === "ar"
+      ? new Intl.DateTimeFormat("ar", { weekday: "short" })
+      : new Intl.DateTimeFormat("en", { weekday: "short" });
+    const labels = Array.isArray(usage.trend)
+      ? usage.trend.map(d => weekdayFmt.format(new Date(d.date)))
+      : MOCK_TREND.labels;
+    const values = Array.isArray(usage.trend)
+      ? usage.trend.map(d => d.count)
+      : MOCK_TREND.values;
     const max = Math.max(...values, 1);
     const w = 380, h = 190, padBottom = 26, barGap = 10;
     const barW = (w - barGap * (values.length - 1)) / values.length;
@@ -665,28 +702,94 @@
     btn.disabled = false; btn.textContent = "Verify all";
   });
 
-  document.getElementById("badgeBtn").addEventListener("click", () => {
+  // Live check + badge generation. No mockup: this always calls the real
+  // GET /api/recruiter/status endpoint first (the same status recruiter
+  // self-registration writes via markRecruiterVerified()), and renders
+  // whichever state — verified or not — that check actually returns.
+  // The embed snippet's <img> itself also re-checks live every time it
+  // loads (src/routes/platform.js /badge-image), so this preview and the
+  // embedded badge can never disagree.
+  async function checkAndRenderBadge(){
+    const dict = TRANSLATIONS[currentLang];
     const num = document.getElementById("badgeInput").value.trim() || "+971501234567";
-    const box = document.getElementById("embedBox");
+    const btn = document.getElementById("badgeBtn");
+    const preview = document.getElementById("badgePreview");
+
+    btn.disabled = true;
+    btn.textContent = dict.badgeCheckingText;
+
+    let status;
+    try{
+      const res = await fetch(`${API_BASE}/recruiter/status?phoneNumber=${encodeURIComponent(num)}`);
+      if (!res.ok) throw 0;
+      status = await res.json(); // { phoneNumber, registered, verifiedAt }
+    }catch(err){
+      preview.style.display = "flex";
+      preview.innerHTML = `<div class="badge-status-note">${dict.badgeCheckFailed}</div>`;
+      btn.disabled = false;
+      btn.textContent = dict.badgeBtnText;
+      return;
+    }
+
     // Real, working endpoint — backed by actual recruiter registration
-    // status (see src/routes/platform.js /badge-image route), not
-    // a placeholder URL. No auth required since this is meant to be
+    // status (see src/routes/platform.js /badge-image route), not a
+    // placeholder URL. No auth required since this is meant to be
     // embedded publicly on a job listing.
     const badgeImageUrl = `${API_BASE}/platform/badge-image/${encodeURIComponent(num)}`;
-    box.innerHTML = `<button class="copy-btn" id="copyBtn">Copy</button>&lt;img src="${badgeImageUrl}" alt="TrustLine Verified"&gt;`;
-    attachCopyHandler();
-  });
+    // Shareable link — the portable alternative to the <img> embed, for
+    // anywhere raw HTML can't be pasted (a plain-text bio, a job board
+    // that strips markup, a messaging app). badge-status.html does its
+    // own live GET /api/recruiter/status check on load, so this link
+    // never goes stale the way a screenshot or static claim would.
+    const shareLink = `${window.location.origin}/badge-status.html?phoneNumber=${encodeURIComponent(num)}`;
+    const badgeClass = status.registered ? "verified-badge" : "verified-badge not-verified";
+    const badgeLabel = status.registered ? dict.badgeVerifiedText : dict.badgeNotVerifiedText;
+    const note = status.registered
+      ? dict.badgeVerifiedNote(num)
+      : `${dict.badgeNotVerifiedNote} <a href="recruiter-register.html" style="color:var(--brand); font-weight:600;">${dict.badgeNotVerifiedLink}</a>`;
 
-  function attachCopyHandler(){
-    const btn = document.getElementById("copyBtn");
+    preview.style.display = "flex";
+    preview.innerHTML = `
+      <div class="${badgeClass}">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.5L13.5 3.8V7.5C13.5 10.8 11.2 13.4 8 14.5C4.8 13.4 2.5 10.8 2.5 7.5V3.8L8 1.5Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M5.5 8L7.2 9.7L10.5 6.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>${badgeLabel}</span>
+      </div>
+      <div class="badge-status-note">${note}</div>
+
+      <div class="share-label" data-i18n="shareLinkLabel">${dict.shareLinkLabel}</div>
+      <div class="link-box">
+        <input type="text" id="shareLinkInput" value="${shareLink}" readonly>
+        <button class="copy-btn" id="copyLinkBtn">${dict.copyBtnText}</button>
+      </div>
+
+      <div class="share-label" data-i18n="embedCodeLabel">${dict.embedCodeLabel}</div>
+      <div class="embed-box" id="embedBox">
+        <button class="copy-btn" id="copyBtn">${dict.copyBtnText}</button>
+        &lt;img src="${badgeImageUrl}" alt="TrustLine Verified"&gt;
+      </div>`;
+    wireCopyButton("copyBtn", () => document.getElementById("embedBox").innerText.replace(/^(Copy|نسخ)\s*/, "").trim());
+    wireCopyButton("copyLinkBtn", () => shareLink);
+
+    btn.disabled = false;
+    btn.textContent = dict.badgeBtnText;
+  }
+  document.getElementById("badgeBtn").addEventListener("click", checkAndRenderBadge);
+
+  // Generic copy-to-clipboard wiring — getText() is called at click time
+  // (not captured up front) so it always copies whatever is currently
+  // shown, not a stale closure value.
+  function wireCopyButton(btnId, getText){
+    const btn = document.getElementById(btnId);
+    if (!btn) return;
     btn.addEventListener("click", () => {
-      const text = document.getElementById("embedBox").innerText.replace(/^Copy\s*/, "").trim();
+      const text = getText();
       navigator.clipboard?.writeText(text).catch(()=>{});
-      btn.textContent = "Copied!";
-      setTimeout(() => { btn.textContent = "Copy"; }, 1500);
+      const dict = TRANSLATIONS[currentLang];
+      const original = dict.copyBtnText;
+      btn.textContent = currentLang === "ar" ? "تم النسخ!" : "Copied!";
+      setTimeout(() => { btn.textContent = original; }, 1500);
     });
   }
-  attachCopyHandler();
 
   document.getElementById("logoutLink").addEventListener("click", () => {
     localStorage.removeItem("trustline_token");
@@ -704,7 +807,7 @@
     const [usage, numbers] = await Promise.all([fetchUsage(), fetchNumbers()]);
     renderStats(usage);
     renderNumbers(numbers);
-    renderTrendChart();
+    renderTrendChart(usage);
     renderStatusChart(numbers);
   })();
 </script>

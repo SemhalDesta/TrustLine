@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en" id="htmlRoot">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recruiter verification — TrustLine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#0A0D12;
+    --panel:#0F141C;
+    --paper:#E9EDF2;
+    --paper-dim:#DCE3EB;
+    --ink:#12151B;
+    --ink-dim:#565F6B;
+    --brand:#FF6A00;
+    --brand-bright:#FF9142;
+    --amber:#D98E4A;
+    --red:#E5483A;
+    --green:#5FBF8A;
+    --line-dark:rgba(18,21,27,0.10);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background-color:var(--paper-dim);
+    background-image:radial-gradient(circle, rgba(18,21,27,0.16) 1.3px, transparent 1.3px);
+    background-size:26px 26px;
+    color:var(--ink);
+    font-family:'Inter', sans-serif;
+    font-size:16px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{font-family:'Space Grotesk', sans-serif; font-weight:600; letter-spacing:-0.01em;}
+  a{color:inherit; text-decoration:none;}
+
+  header{
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    padding:16px 28px; display:flex; align-items:center; justify-content:space-between;
+    backdrop-filter:blur(10px);
+    background:rgba(233,237,242,0.72);
+    border-bottom:1px solid var(--line-dark);
+  }
+  .brand{font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:17px; display:flex; align-items:center; gap:10px;}
+  nav{display:flex; align-items:center; gap:4px;}
+  nav a.navlink{font-size:14px; color:inherit; opacity:0.72; margin-right:20px;}
+  nav a.navlink:hover{opacity:1;}
+  #langToggle{background:none; border:1px solid var(--line-dark); color:inherit; font-size:13px; padding:6px 14px; border-radius:6px; cursor:pointer; font-family:'Inter', sans-serif;}
+
+  main{
+    max-width:520px; margin:0 auto; padding:140px 24px 80px;
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace; font-size:12.5px; text-transform:uppercase;
+    letter-spacing:0.08em; color:var(--brand); margin-bottom:12px;
+  }
+  h1{font-size:clamp(24px,4vw,30px); line-height:1.2; margin-bottom:14px;}
+  p.lede{color:var(--ink-dim); font-size:15.5px; margin-bottom:32px; max-width:48ch;}
+
+  .card{
+    background:#fff; border:1px solid var(--line-dark); border-radius:14px;
+    padding:28px; box-shadow:0 20px 50px -25px rgba(10,13,18,0.25);
+  }
+
+  .field input{
+    width:100%; background:var(--paper); border:1px solid var(--line-dark); border-radius:8px;
+    padding:13px 14px; font-family:'Inter', sans-serif; font-size:15px; color:var(--ink);
+    margin-bottom:10px;
+  }
+  .field input:focus{outline:none; border-color:var(--brand);}
+
+  .btn-primary{
+    width:100%; background:var(--brand); color:var(--void); border:none;
+    font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:15px;
+    padding:13px 18px; border-radius:8px; cursor:pointer;
+  }
+  .btn-primary:hover{background:var(--brand-bright);}
+  .btn-primary:disabled{opacity:0.6; cursor:default;}
+
+  .status-card{
+    border-radius:12px; padding:24px; text-align:center;
+  }
+  .status-card.verified{background:#EAFBF2; border:1.5px solid var(--green);}
+  .status-card.not-verified{background:rgba(138,143,152,0.08); border:1.5px solid #8a8f98;}
+  .status-card.loading{background:var(--paper); border:1px solid var(--line-dark); color:var(--ink-dim);}
+  .status-icon{width:48px; height:48px; margin:0 auto 14px;}
+  .status-title{font-size:19px; font-weight:600; margin-bottom:8px;}
+  .status-card.verified .status-title{color:#0e6b62;}
+  .status-card.not-verified .status-title{color:#5c6169;}
+  .status-number{font-family:'IBM Plex Mono', monospace; font-size:14px; color:var(--ink-dim); margin-bottom:10px;}
+  .status-detail{font-size:14px; color:var(--ink-dim); max-width:38ch; margin:0 auto;}
+  .status-detail a{color:var(--brand); font-weight:600;}
+
+  .lookup-toggle{display:block; text-align:center; margin-top:18px; font-size:13.5px; color:var(--ink-dim); cursor:pointer;}
+  .lookup-toggle:hover{color:var(--ink);}
+</style>
+</head>
+<body>
+
+<header id="siteHeader">
+  <a href="about.html" class="brand">
+    <svg width="30" height="30" viewBox="0 0 40 40">
+      <rect x="2" y="2" width="36" height="36" rx="10" fill="#FF6A00"/>
+      <line x1="11" y1="9" x2="20" y2="15" stroke="#0A0D12" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="29" y1="9" x2="20" y2="15" stroke="#0A0D12" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="20" y1="6" x2="20" y2="15" stroke="#0A0D12" stroke-width="1.8" stroke-linecap="round"/>
+      <circle cx="11" cy="9" r="2.1" fill="#FF6A00" stroke="#0A0D12" stroke-width="1.5"/>
+      <circle cx="29" cy="9" r="2.1" fill="#FF6A00" stroke="#0A0D12" stroke-width="1.5"/>
+      <circle cx="20" cy="6" r="1.8" fill="#FF6A00" stroke="#0A0D12" stroke-width="1.5"/>
+      <rect x="14.5" y="15" width="11" height="19" rx="2.6" fill="none" stroke="#0A0D12" stroke-width="2"/>
+      <line x1="17.5" y1="18.5" x2="22.5" y2="18.5" stroke="#0A0D12" stroke-width="1.5" stroke-linecap="round"/>
+      <circle cx="20" cy="30.5" r="1.1" fill="#0A0D12"/>
+    </svg>
+    TrustLine
+  </a>
+  <nav>
+    <a class="navlink" href="verify.html" data-i18n="navCheck">Check a number</a>
+    <a class="navlink" href="about.html" data-i18n="navAbout">About</a>
+    <button type="button" id="langToggle">العربية</button>
+  </nav>
+</header>
+
+<main>
+  <div class="eyebrow" data-i18n="eyebrow">Recruiter verification</div>
+  <h1 data-i18n="headline">Is this recruiter's number verified?</h1>
+  <p class="lede" data-i18n="lede">
+    A live, real-time check — not a static badge. This page always reflects
+    this number's actual verification status with TrustLine, checked fresh
+    every time it's opened.
+  </p>
+
+  <div class="card">
+    <div id="lookupForm" style="display:none;">
+      <div class="field">
+        <input id="phoneInput" type="tel" placeholder="+971 5X XXX XXXX" autocomplete="tel">
+      </div>
+      <button type="button" class="btn-primary" id="checkBtn" data-i18n="checkBtn">Check status</button>
+    </div>
+
+    <div id="statusArea"></div>
+
+    <a href="javascript:void(0)" class="lookup-toggle" id="lookupToggle" data-i18n="lookupToggle" style="display:none;">Check a different number →</a>
+  </div>
+</main>
+
+<script>
+  const API_BASE = "http://localhost:4000/api";
+
+  const TRANSLATIONS = {
+    en: {
+      dir: "ltr",
+      navCheck: "Check a number", navAbout: "About",
+      eyebrow: "Recruiter verification",
+      headline: "Is this recruiter's number verified?",
+      lede: "A live, real-time check — not a static badge. This page always reflects this number's actual verification status with TrustLine, checked fresh every time it's opened.",
+      checkBtn: "Check status",
+      checkingText: "Checking…",
+      lookupToggle: "Check a different number →",
+      loadingText: "Checking live status…",
+      verifiedTitle: "✓ TrustLine Verified",
+      verifiedDetail: (date) => `This number completed real network-based identity verification on ${date}.`,
+      notVerifiedTitle: "Not Yet Verified",
+      notVerifiedDetail: "This number hasn't completed TrustLine's recruiter verification. If this is your number, you can",
+      notVerifiedLink: "verify it now →",
+      missingNumberTitle: "Enter a number to check",
+      missingNumberDetail: "Paste a recruiter's phone number below to see its live verification status.",
+      errorTitle: "Couldn't check this number",
+      errorDetail: "Couldn't reach the server. Please try again.",
+      langToggleLabel: "العربية",
+    },
+    ar: {
+      dir: "rtl",
+      navCheck: "تحقق من رقم", navAbout: "حول",
+      eyebrow: "التحقق من المُجنِّد",
+      headline: "هل رقم هذا المُجنِّد موثّق؟",
+      lede: "فحص حي في الوقت الفعلي — وليس شارة ثابتة. تعكس هذه الصفحة دائمًا حالة التحقق الفعلية لهذا الرقم لدى TrustLine، ويتم التحقق منها من جديد في كل مرة يتم فتحها.",
+      checkBtn: "تحقق من الحالة",
+      checkingText: "جارٍ التحقق…",
+      lookupToggle: "تحقق من رقم آخر ←",
+      loadingText: "جارٍ التحقق من الحالة مباشرةً…",
+      verifiedTitle: "✓ موثّق من TrustLine",
+      verifiedDetail: (date) => `أكمل هذا الرقم التحقق الفعلي من الهوية عبر الشبكة بتاريخ ${date}.`,
+      notVerifiedTitle: "غير موثّق بعد",
+      notVerifiedDetail: "لم يكمل هذا الرقم عملية التحقق الخاصة بـ TrustLine. إذا كان هذا رقمك، يمكنك",
+      notVerifiedLink: "التحقق الآن ←",
+      missingNumberTitle: "أدخل رقمًا للتحقق",
+      missingNumberDetail: "الصق رقم هاتف المُجنِّد أدناه لرؤية حالة التحقق المباشرة الخاصة به.",
+      errorTitle: "تعذّر التحقق من هذا الرقم",
+      errorDetail: "تعذّر الوصول إلى الخادم. حاول مرة أخرى.",
+      langToggleLabel: "English",
+    },
+  };
+
+  let currentLang = "en";
+  let currentPhoneNumber = null;
+
+  function applyLanguage() {
+    const dict = TRANSLATIONS[currentLang];
+    document.getElementById("htmlRoot").setAttribute("lang", currentLang);
+    document.getElementById("htmlRoot").setAttribute("dir", dict.dir);
+    document.querySelectorAll("[data-i18n]").forEach((el) => {
+      const key = el.getAttribute("data-i18n");
+      if (dict[key]) el.textContent = dict[key];
+    });
+    document.getElementById("langToggle").textContent = dict.langToggleLabel;
+    render(); // re-render the live status area in the new language
+  }
+
+  document.getElementById("langToggle").addEventListener("click", () => {
+    currentLang = currentLang === "en" ? "ar" : "en";
+    applyLanguage();
+  });
+
+  function formatDate(iso){
+    try {
+      return new Intl.DateTimeFormat(currentLang === "ar" ? "ar" : "en", { year: "numeric", month: "long", day: "numeric" }).format(new Date(iso));
+    } catch (e) { return iso; }
+  }
+
+  let lastStatus = null; // cached result of the last live check, for re-render on language toggle
+
+  function render() {
+    const dict = TRANSLATIONS[currentLang];
+    const area = document.getElementById("statusArea");
+    const lookupForm = document.getElementById("lookupForm");
+    const lookupToggle = document.getElementById("lookupToggle");
+
+    if (!currentPhoneNumber) {
+      lookupForm.style.display = "block";
+      lookupToggle.style.display = "none";
+      area.innerHTML = `
+        <div class="status-card loading">
+          <div class="status-title">${dict.missingNumberTitle}</div>
+          <div class="status-detail">${dict.missingNumberDetail}</div>
+        </div>`;
+      return;
+    }
+
+    lookupForm.style.display = "none";
+    lookupToggle.style.display = "block";
+
+    if (lastStatus === "loading") {
+      area.innerHTML = `<div class="status-card loading">${dict.loadingText}</div>`;
+      return;
+    }
+    if (lastStatus === "error") {
+      area.innerHTML = `
+        <div class="status-card not-verified">
+          <div class="status-title">${dict.errorTitle}</div>
+          <div class="status-number">${currentPhoneNumber}</div>
+          <div class="status-detail">${dict.errorDetail}</div>
+        </div>`;
+      return;
+    }
+    if (lastStatus.registered) {
+      area.innerHTML = `
+        <div class="status-card verified">
+          <div class="status-title">${dict.verifiedTitle}</div>
+          <div class="status-number">${currentPhoneNumber}</div>
+          <div class="status-detail">${dict.verifiedDetail(formatDate(lastStatus.verifiedAt))}</div>
+        </div>`;
+    } else {
+      area.innerHTML = `
+        <div class="status-card not-verified">
+          <div class="status-title">${dict.notVerifiedTitle}</div>
+          <div class="status-number">${currentPhoneNumber}</div>
+          <div class="status-detail">${dict.notVerifiedDetail} <a href="recruiter-register.html">${dict.notVerifiedLink}</a></div>
+        </div>`;
+    }
+  }
+
+  async function checkStatus(phoneNumber) {
+    currentPhoneNumber = phoneNumber;
+    lastStatus = "loading";
+    render();
+    try {
+      const res = await fetch(`${API_BASE}/recruiter/status?phoneNumber=${encodeURIComponent(phoneNumber)}`);
+      if (!res.ok) throw 0;
+      lastStatus = await res.json(); // { phoneNumber, registered, verifiedAt }
+    } catch (err) {
+      lastStatus = "error";
+    }
+    render();
+  }
+
+  document.getElementById("checkBtn").addEventListener("click", () => {
+    const num = document.getElementById("phoneInput").value.trim();
+    if (num) checkStatus(num);
+  });
+  document.getElementById("phoneInput").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") document.getElementById("checkBtn").click();
+  });
+  document.getElementById("lookupToggle").addEventListener("click", () => {
+    currentPhoneNumber = null;
+    lastStatus = null;
+    render();
+    document.getElementById("phoneInput").focus();
+  });
+
+  // Entry point: a shared link looks like badge-status.html?phoneNumber=+971...
+  // — this is the whole point of this page over the <img> embed: it works
+  // anywhere a plain URL can be pasted (bios, listings that strip HTML,
+  // messaging apps), not just pages that render raw <img> tags.
+  const params = new URLSearchParams(window.location.search);
+  const initialNumber = params.get("phoneNumber");
+  if (initialNumber) {
+    checkStatus(initialNumber);
+  } else {
+    render();
+  }
+</script>
+
+</body>
+</html>
