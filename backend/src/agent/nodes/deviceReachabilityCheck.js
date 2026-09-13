@@ -1,5 +1,5 @@
 // backend/src/agent/nodes/deviceReachabilityCheck.js
-const { checkDeviceReachability } = require("../../services/camaraClient");
+const { checkDeviceReachability, describeSignalFailure } = require("../../services/camaraClient");
 
 /**
  * LangGraph node: deviceReachabilityCheck
@@ -21,7 +21,7 @@ async function deviceReachabilityCheck(state) {
       reasoningTrace: [
         {
           step: "deviceReachabilityCheck",
-          detail: `Device Reachability check failed: ${JSON.stringify(result.error)}`,
+          detail: `Device Reachability check unavailable (${describeSignalFailure(result.error)}) — treated as inconclusive, not a red flag.`,
           timestamp: new Date().toISOString(),
         },
       ],

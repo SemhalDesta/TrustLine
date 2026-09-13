@@ -1,5 +1,5 @@
 // backend/src/agent/nodes/deviceRoamingCheck.js
-const { checkDeviceRoaming } = require("../../services/camaraClient");
+const { checkDeviceRoaming, describeSignalFailure } = require("../../services/camaraClient");
 
 /**
  * LangGraph node: deviceRoamingCheck
@@ -20,7 +20,7 @@ async function deviceRoamingCheck(state) {
       reasoningTrace: [
         {
           step: "deviceRoamingCheck",
-          detail: `Device Roaming check failed: ${JSON.stringify(result.error)}`,
+          detail: `Device Roaming check unavailable (${describeSignalFailure(result.error)}) — treated as inconclusive, not a red flag.`,
           timestamp: new Date().toISOString(),
         },
       ],

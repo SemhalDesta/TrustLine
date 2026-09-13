@@ -6,9 +6,8 @@
  * correct" from "is my agent logic correct."
  *
  * Usage (works the same on Windows, Mac, Linux — reads from .env):
- *   1. Put CAMARA_RAPIDAPI_KEY=your_real_key in backend/.env
- *   2. cd backend
- *   3. node test-camara.js +9999991000
+ *   1. Put CAMARA_RAPIDAPI_KEY=your_real_key in .env (project root)
+ *   2. node test-camara.js +9999991000
  *
  * Use one of Nokia's own simulator numbers if you have them (check your
  * Network-as-Code dashboard/docs for the current list — these change and

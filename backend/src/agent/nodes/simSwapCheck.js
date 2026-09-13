@@ -1,5 +1,5 @@
 // backend/src/agent/nodes/simSwapCheck.js
-const { checkSimSwap } = require("../../services/camaraClient");
+const { checkSimSwap, describeSignalFailure } = require("../../services/camaraClient");
 
 /**
  * LangGraph node: simSwapCheck
@@ -21,7 +21,7 @@ async function simSwapCheck(state) {
       reasoningTrace: [
         {
           step: "simSwapCheck",
-          detail: `SIM Swap check failed: ${JSON.stringify(result.error)}`,
+          detail: `SIM Swap check unavailable (${describeSignalFailure(result.error)}) — treated as inconclusive, not a red flag.`,
           timestamp: new Date().toISOString(),
         },
       ],

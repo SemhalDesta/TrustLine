@@ -1,5 +1,5 @@
 // backend/src/agent/nodes/deviceSwapCheck.js
-const { checkDeviceSwap } = require("../../services/camaraClient");
+const { checkDeviceSwap, describeSignalFailure } = require("../../services/camaraClient");
 
 /**
  * LangGraph node: deviceSwapCheck
@@ -17,7 +17,7 @@ async function deviceSwapCheck(state) {
       reasoningTrace: [
         {
           step: "deviceSwapCheck",
-          detail: `Device Swap check failed: ${JSON.stringify(result.error)}`,
+          detail: `Device Swap check unavailable (${describeSignalFailure(result.error)}) — treated as inconclusive, not a red flag.`,
           timestamp: new Date().toISOString(),
         },
       ],

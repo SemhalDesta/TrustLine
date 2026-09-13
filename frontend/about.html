@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" id="htmlRoot">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -357,10 +357,11 @@
     TrustLine
   </a>
   <nav>
-    <a class="navlink" href="#how">How it works</a>
-    <a class="navlink" href="#agent">The signal</a>
-    <a class="navlink" href="login.html">Log in</a>
-    <a class="btn btn-primary" href="verify.html">Check a number</a>
+    <a class="navlink" href="#how" data-i18n="navHow">How it works</a>
+    <a class="navlink" href="#agent" data-i18n="navSignal">The signal</a>
+    <a class="navlink" href="login.html" data-i18n="navLogin">Log in</a>
+    <a class="btn btn-primary" href="verify.html" data-i18n="navCheck">Check a number</a>
+    <button type="button" id="langToggle" class="btn btn-ghost-light" style="margin-left:8px;">العربية</button>
   </nav>
 </header>
 
@@ -369,38 +370,38 @@
   <canvas class="net-local"></canvas>
   <div class="wrap">
     <div class="eyebrow-route halo-dark">
-      <span>PHONE NUMBER</span><span class="seg">→</span><span>NETWORK</span><span class="seg">→</span><span>EVIDENCE</span><span class="seg">→</span><span>VERDICT</span>
+      <span data-i18n="routePhone">PHONE NUMBER</span><span class="seg">→</span><span data-i18n="routeNetwork">NETWORK</span><span class="seg">→</span><span data-i18n="routeEvidence">EVIDENCE</span><span class="seg">→</span><span data-i18n="routeVerdict">VERDICT</span>
     </div>
-    <h1 class="hero-h halo-dark">Know who's really on the other end of the line.</h1>
-    <p class="sub halo-dark">TrustLine reads the signals a phone number leaves behind — SIM history, device status, scam reports — and turns them into one clear answer before you send money, share a document, or take the call.</p>
+    <h1 class="hero-h halo-dark" data-i18n="heroH1">Know who's really on the other end of the line.</h1>
+    <p class="sub halo-dark" data-i18n="heroSub">TrustLine reads the signals a phone number leaves behind — SIM history, device status, scam reports — and turns them into one clear answer before you send money, share a document, or take the call.</p>
     <div class="hero-actions">
-      <a href="verify.html" class="btn btn-primary btn-lg">Check a number</a>
-      <a href="login.html" class="btn btn-ghost-light btn-lg">For organizations</a>
+      <a href="verify.html" class="btn btn-primary btn-lg" data-i18n="heroCheckBtn">Check a number</a>
+      <a href="login.html" class="btn btn-ghost-light btn-lg" data-i18n="heroOrgBtn">For organizations</a>
     </div>
-    <p class="hero-note halo-dark" style="margin-top:28px;">No account needed for workers · Free to check</p>
+    <p class="hero-note halo-dark" style="margin-top:28px;" data-i18n="heroNote">No account needed for workers · Free to check</p>
   </div>
 </section>
 
 <!-- HOW IT WORKS -->
 <section class="how" id="how">
   <div class="wrap">
-    <div class="section-kicker">HOW A VERDICT IS BUILT</div>
-    <h2 class="section-h">Three quiet signals, read together, say more than any one alone.</h2>
+    <div class="section-kicker" data-i18n="howKicker">HOW A VERDICT IS BUILT</div>
+    <h2 class="section-h" data-i18n="howH2">Three quiet signals, read together, say more than any one alone.</h2>
     <div class="steps">
       <div class="step">
         <span class="step-mark mono">01</span>
-        <h3>Enter the number</h3>
-        <p>No account, no app install. Paste a number the way it was given to you.</p>
+        <h3 data-i18n="step1H">Enter the number</h3>
+        <p data-i18n="step1P">No account, no app install. Paste a number the way it was given to you.</p>
       </div>
       <div class="step">
         <span class="step-mark mono">02</span>
-        <h3>We query the network directly</h3>
-        <p>TrustLine asks the carriers themselves whether the SIM has changed, whether the device is reachable, and whether the number has been reported before.</p>
+        <h3 data-i18n="step2H">We query the network directly</h3>
+        <p data-i18n="step2P">TrustLine asks the carriers themselves whether the SIM has changed, whether the device is reachable, and whether the number has been reported before.</p>
       </div>
       <div class="step">
         <span class="step-mark mono">03</span>
-        <h3>Get one plain verdict</h3>
-        <p>Low risk, caution, or high risk — with the specific reason underneath it, in under three seconds.</p>
+        <h3 data-i18n="step3H">Get one plain verdict</h3>
+        <p data-i18n="step3P">Low risk, caution, or high risk — with the specific reason underneath it, in under three seconds.</p>
       </div>
     </div>
   </div>
@@ -410,8 +411,8 @@
 <section class="agent" id="agent">
   <div class="wrap">
     <div class="agent-head">
-      <h2 class="halo-dark">Three signals. One decision.</h2>
-      <p class="halo-dark">Every check runs the same evidence through the same reasoning, so the same number gets the same answer no matter who's asking.</p>
+      <h2 class="halo-dark" data-i18n="agentH2">Three signals. One decision.</h2>
+      <p class="halo-dark" data-i18n="agentP">Every check runs the same evidence through the same reasoning, so the same number gets the same answer no matter who's asking.</p>
     </div>
     <div class="converge">
       <svg class="converge-lines" viewBox="0 0 640 300" preserveAspectRatio="none">
@@ -426,12 +427,12 @@
         <path d="M 320 191 L 320 285" />
         <path class="pulse" d="M 320 191 L 320 285" style="animation-delay:2.2s"/>
       </svg>
-      <div class="signal-node n1"><div class="lab">SIGNAL 01</div>SIM swap history</div>
-      <div class="signal-node n2"><div class="lab">SIGNAL 02</div>Device status</div>
-      <div class="signal-node n3"><div class="lab">SIGNAL 03</div>Location match</div>
-      <div class="signal-node n4"><div class="lab">SIGNAL 04</div>Scam reports</div>
+      <div class="signal-node n1"><div class="lab">SIGNAL 01</div><span data-i18n="signal1">SIM swap history</span></div>
+      <div class="signal-node n2"><div class="lab">SIGNAL 02</div><span data-i18n="signal2">Device status</span></div>
+      <div class="signal-node n3"><div class="lab">SIGNAL 03</div><span data-i18n="signal3">Location match</span></div>
+      <div class="signal-node n4"><div class="lab">SIGNAL 04</div><span data-i18n="signal4">Scam reports</span></div>
       <div class="core"><span>TRUSTLINE<br>AI</span></div>
-      <div class="verdict-out mono">CLEAR VERDICT</div>
+      <div class="verdict-out mono" data-i18n="verdictOut">CLEAR VERDICT</div>
     </div>
   </div>
 </section>
@@ -439,28 +440,32 @@
 <!-- ROLES — real navigation -->
 <section class="roles" id="orgs">
   <div class="wrap">
-    <h2>Built for three different jobs, one shared verdict.</h2>
-    <p>Pick the one that's you — each has its own tools, not a shared inbox.</p>
+    <h2 data-i18n="rolesH2">Built for three different jobs, one shared verdict.</h2>
+    <p data-i18n="rolesP">Pick the one that's you — each has its own tools, not a shared inbox.</p>
     <div class="role-grid">
       <a class="role-card" href="verify.html">
-        <div class="num mono">FOR WORKERS</div>
-        <h3>Check a recruiter's number</h3>
-        <p>Verify a number before you pay a fee or travel — free, no account, works over SMS too.</p>
-        <div class="go">Check a number <span class="arrow">→</span></div>
+        <div class="num mono" data-i18n="roleWorkerTag">FOR WORKERS</div>
+        <h3 data-i18n="roleWorkerH">Check a recruiter's number</h3>
+        <p data-i18n="roleWorkerP">Verify a number before you pay a fee or travel — free, no account, works over SMS too.</p>
+        <div class="go" data-i18n="roleWorkerGo">Check a number <span class="arrow">→</span></div>
       </a>
       <a class="role-card" href="login.html">
-        <div class="num mono">FOR NGOs &amp; MINISTRIES</div>
-        <h3>Review scam reports</h3>
-        <p>Verify worker-submitted reports, track fraud patterns by corridor, and export data for policy work.</p>
-        <div class="go">Log in to dashboard <span class="arrow">→</span></div>
+        <div class="num mono" data-i18n="roleNgoTag">FOR NGOs &amp; MINISTRIES</div>
+        <h3 data-i18n="roleNgoH">Review scam reports</h3>
+        <p data-i18n="roleNgoP">Verify worker-submitted reports, track fraud patterns by corridor, and export data for policy work.</p>
+        <div class="go" data-i18n="roleNgoGo">Log in to dashboard <span class="arrow">→</span></div>
       </a>
       <a class="role-card" href="login.html">
-        <div class="num mono">FOR RECRUITMENT PLATFORMS</div>
-        <h3>Verify your own agents</h3>
-        <p>Bulk-check your registered numbers and generate a "TrustLine Verified" badge for legitimate listings.</p>
-        <div class="go">Log in to dashboard <span class="arrow">→</span></div>
+        <div class="num mono" data-i18n="rolePlatformTag">FOR RECRUITMENT PLATFORMS</div>
+        <h3 data-i18n="rolePlatformH">Verify your own agents</h3>
+        <p data-i18n="rolePlatformP">Bulk-check your registered numbers and generate a "TrustLine Verified" badge for legitimate listings.</p>
+        <div class="go" data-i18n="rolePlatformGo">Log in to dashboard <span class="arrow">→</span></div>
       </a>
     </div>
+    <p style="margin-top:20px; text-align:center; font-size:14.5px; color:var(--ink-dim);" data-i18n="roleRecruiterText">
+      Registering as an individual recruiter, not a platform?
+      <a href="recruiter-register.html" style="color:var(--brand); font-weight:600;" data-i18n="roleRecruiterLink">Verify your own number →</a>
+    </p>
   </div>
 </section>
 
@@ -483,30 +488,131 @@
           </svg>
           TrustLine
         </div>
-        <p>A verdict you can read in three seconds — built for the MENA Ignite Hackathon.</p>
+        <p data-i18n="footerTagline">A verdict you can read in three seconds — built for the MENA Ignite Hackathon.</p>
       </div>
       <div class="footer-links">
         <div class="footer-col">
-          <h4>PRODUCT</h4>
-          <a href="verify.html">Check a number</a>
-          <a href="#how">How it works</a>
-          <a href="#agent">The signal</a>
+          <h4 data-i18n="footerProductH">PRODUCT</h4>
+          <a href="verify.html" data-i18n="footerCheckLink">Check a number</a>
+          <a href="#how" data-i18n="footerHowLink">How it works</a>
+          <a href="#agent" data-i18n="footerSignalLink">The signal</a>
         </div>
         <div class="footer-col">
-          <h4>ORGANIZATIONS</h4>
-          <a href="login.html">NGO / Ministry login</a>
-          <a href="login.html">Platform login</a>
+          <h4 data-i18n="footerOrgH">ORGANIZATIONS</h4>
+          <a href="login.html" data-i18n="footerNgoLogin">NGO / Ministry login</a>
+          <a href="login.html" data-i18n="footerPlatformLogin">Platform login</a>
         </div>
       </div>
     </div>
     <div class="footer-bottom">
       <span>© 2026 TrustLine</span>
-      <span>Theme 1 · MENA Ignite Hackathon</span>
+      <span data-i18n="footerTheme">Theme 1 · MENA Ignite Hackathon</span>
     </div>
   </div>
 </footer>
 
 <script>
+  const TRANSLATIONS = {
+    en: {
+      dir: "ltr",
+      navHow: "How it works", navSignal: "The signal", navLogin: "Log in", navCheck: "Check a number",
+      routePhone: "PHONE NUMBER", routeNetwork: "NETWORK", routeEvidence: "EVIDENCE", routeVerdict: "VERDICT",
+      heroH1: "Know who's really on the other end of the line.",
+      heroSub: "TrustLine reads the signals a phone number leaves behind — SIM history, device status, scam reports — and turns them into one clear answer before you send money, share a document, or take the call.",
+      heroCheckBtn: "Check a number", heroOrgBtn: "For organizations",
+      heroNote: "No account needed for workers · Free to check",
+      howKicker: "HOW A VERDICT IS BUILT",
+      howH2: "Three quiet signals, read together, say more than any one alone.",
+      step1H: "Enter the number", step1P: "No account, no app install. Paste a number the way it was given to you.",
+      step2H: "We query the network directly",
+      step2P: "TrustLine asks the carriers themselves whether the SIM has changed, whether the device is reachable, and whether the number has been reported before.",
+      step3H: "Get one plain verdict",
+      step3P: "Low risk, caution, or high risk — with the specific reason underneath it, in under three seconds.",
+      agentH2: "Three signals. One decision.",
+      agentP: "Every check runs the same evidence through the same reasoning, so the same number gets the same answer no matter who's asking.",
+      signal1: "SIM swap history", signal2: "Device status", signal3: "Location match", signal4: "Scam reports",
+      verdictOut: "CLEAR VERDICT",
+      rolesH2: "Built for three different jobs, one shared verdict.",
+      rolesP: "Pick the one that's you — each has its own tools, not a shared inbox.",
+      roleWorkerTag: "FOR WORKERS", roleWorkerH: "Check a recruiter's number",
+      roleWorkerP: "Verify a number before you pay a fee or travel — free, no account, works over SMS too.",
+      roleWorkerGo: "Check a number →",
+      roleNgoTag: "FOR NGOs & MINISTRIES", roleNgoH: "Review scam reports",
+      roleNgoP: "Verify worker-submitted reports, track fraud patterns by corridor, and export data for policy work.",
+      roleNgoGo: "Log in to dashboard →",
+      rolePlatformTag: "FOR RECRUITMENT PLATFORMS", rolePlatformH: "Verify your own agents",
+      rolePlatformP: "Bulk-check your registered numbers and generate a \"TrustLine Verified\" badge for legitimate listings.",
+      rolePlatformGo: "Log in to dashboard →",
+      roleRecruiterText: "Registering as an individual recruiter, not a platform?",
+      roleRecruiterLink: "Verify your own number →",
+      footerTagline: "A verdict you can read in three seconds — built for the MENA Ignite Hackathon.",
+      footerProductH: "PRODUCT", footerCheckLink: "Check a number", footerHowLink: "How it works", footerSignalLink: "The signal",
+      footerOrgH: "ORGANIZATIONS", footerNgoLogin: "NGO / Ministry login", footerPlatformLogin: "Platform login",
+      footerTheme: "Theme 1 · MENA Ignite Hackathon",
+      langToggleLabel: "العربية",
+    },
+    ar: {
+      dir: "rtl",
+      navHow: "كيف يعمل", navSignal: "الإشارة", navLogin: "تسجيل الدخول", navCheck: "تحقّق من رقم",
+      routePhone: "رقم الهاتف", routeNetwork: "الشبكة", routeEvidence: "الأدلة", routeVerdict: "القرار",
+      heroH1: "اعرف من على الطرف الآخر من الخط فعليًا.",
+      heroSub: "يقرأ TrustLine الإشارات التي يتركها رقم الهاتف — تاريخ الشريحة، حالة الجهاز، بلاغات الاحتيال — ويحوّلها إلى إجابة واضحة واحدة قبل أن ترسل مالًا أو تشارك مستندًا أو تُجري المكالمة.",
+      heroCheckBtn: "تحقّق من رقم", heroOrgBtn: "للمؤسسات",
+      heroNote: "لا حاجة لحساب للعمال · التحقق مجاني",
+      howKicker: "كيف يُبنى القرار",
+      howH2: "ثلاث إشارات هادئة، عند قراءتها معًا، تقول أكثر من أي واحدة بمفردها.",
+      step1H: "أدخل الرقم", step1P: "بدون حساب، بدون تثبيت تطبيق. الصق الرقم كما وصلك.",
+      step2H: "نستعلم من الشبكة مباشرة",
+      step2P: "يسأل TrustLine شركات الاتصالات نفسها عمّا إذا تغيّرت الشريحة، وهل الجهاز قابل للوصول، وهل تم الإبلاغ عن الرقم من قبل.",
+      step3H: "احصل على قرار واضح واحد",
+      step3P: "خطر منخفض، أو تحذير، أو خطر مرتفع — مع السبب المحدد وراءه، في أقل من ثلاث ثوانٍ.",
+      agentH2: "ثلاث إشارات. قرار واحد.",
+      agentP: "يمر كل فحص بنفس الأدلة عبر نفس المنطق، بحيث يحصل نفس الرقم على نفس الإجابة بغض النظر عمن يسأل.",
+      signal1: "تاريخ تبديل الشريحة", signal2: "حالة الجهاز", signal3: "تطابق الموقع", signal4: "بلاغات الاحتيال",
+      verdictOut: "قرار واضح",
+      rolesH2: "صُمم لثلاث وظائف مختلفة، وقرار واحد مشترك.",
+      rolesP: "اختر ما يناسبك — لكل منها أدواتها الخاصة، وليست صندوق وارد مشترك.",
+      roleWorkerTag: "للعمال", roleWorkerH: "تحقّق من رقم المجنِّد",
+      roleWorkerP: "تحقّق من رقم قبل أن تدفع رسومًا أو تسافر — مجانًا، بدون حساب، ويعمل عبر الرسائل النصية أيضًا.",
+      roleWorkerGo: "تحقّق من رقم ←",
+      roleNgoTag: "للمنظمات غير الحكومية والوزارات", roleNgoH: "مراجعة بلاغات الاحتيال",
+      roleNgoP: "تحقّق من البلاغات المقدمة من العمال، وتتبّع أنماط الاحتيال حسب الممر، وصدّر البيانات لأغراض السياسات.",
+      roleNgoGo: "تسجيل الدخول إلى لوحة التحكم ←",
+      rolePlatformTag: "لمنصات التوظيف", rolePlatformH: "تحقّق من وكلائك",
+      rolePlatformP: "تحقّق بالجملة من أرقامك المسجلة وأنشئ شارة \"موثّق من TrustLine\" للإعلانات الشرعية.",
+      rolePlatformGo: "تسجيل الدخول إلى لوحة التحكم ←",
+      roleRecruiterText: "هل تسجّل كمجنِّد فردي، لا كمنصة؟",
+      roleRecruiterLink: "تحقّق من رقمك الخاص ←",
+      footerTagline: "قرار يمكنك قراءته في ثلاث ثوانٍ — تم بناؤه لهاكاثون MENA Ignite.",
+      footerProductH: "المنتج", footerCheckLink: "تحقّق من رقم", footerHowLink: "كيف يعمل", footerSignalLink: "الإشارة",
+      footerOrgH: "المؤسسات", footerNgoLogin: "دخول المنظمات/الوزارات", footerPlatformLogin: "دخول المنصات",
+      footerTheme: "المحور 1 · هاكاثون MENA Ignite",
+      langToggleLabel: "English",
+    },
+  };
+
+  let currentLang = "en";
+
+  function applyLanguage() {
+    const dict = TRANSLATIONS[currentLang];
+    document.getElementById("htmlRoot").setAttribute("lang", currentLang);
+    document.getElementById("htmlRoot").setAttribute("dir", dict.dir);
+    document.querySelectorAll("[data-i18n]").forEach((el) => {
+      const key = el.getAttribute("data-i18n");
+      if (dict[key] === undefined) return;
+      // Some elements (like the "go" links) have a nested <span> arrow we
+      // don't want to clobber — those store plain text via textContent
+      // fine since we didn't nest anything inside the tagged elements above.
+      el.textContent = dict[key];
+    });
+    document.getElementById("langToggle").textContent = dict.langToggleLabel;
+  }
+
+  document.getElementById("langToggle").addEventListener("click", () => {
+    currentLang = currentLang === "en" ? "ar" : "en";
+    applyLanguage();
+  });
+
   const header = document.getElementById('siteHeader');
   const darkSections = [document.querySelector('.hero'), document.getElementById('agent'), document.querySelector('footer')];
   const io = new IntersectionObserver((entries)=>{
