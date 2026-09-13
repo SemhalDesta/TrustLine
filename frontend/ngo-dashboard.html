@@ -245,6 +245,10 @@
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1.5 8.5H4.5L6 4.5L9 12L10.5 8.5H14.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <span data-i18n="navActivity">Recent Activity</span>
     </a>
+    <a href="#corridor" class="side-link">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1.5 3.5H14.5M1.5 8H10M1.5 12.5H7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      <span data-i18n="navCorridor">Corridor Breakdown</span>
+    </a>
     <div class="sidebar-foot" data-i18n="sidebarFoot">Ministry of Labor<br>Demo account</div>
   </aside>
 
@@ -261,7 +265,6 @@
         </div>
         <div class="num" id="statChecks">—</div>
         <div class="lbl" data-i18n="statChecksLbl">Checks run (30 days)</div>
-        <div class="trend up" data-i18n="statChecksTrend">↑ 18% vs last month</div>
       </div>
       <div class="stat-card" style="--stat-color:#E5483A;">
         <div class="icon" style="color:#E5483A;">
@@ -269,7 +272,6 @@
         </div>
         <div class="num" id="statHighRisk">—</div>
         <div class="lbl" data-i18n="statHighRiskLbl">Flagged high risk</div>
-        <div class="trend warn" data-i18n="statHighRiskTrend">↑ 2 this week</div>
       </div>
       <div class="stat-card" style="--stat-color:#D98E4A;">
         <div class="icon" style="color:#D98E4A;">
@@ -299,6 +301,15 @@
         <div id="riskChart"></div>
       </div>
     </div>
+
+    <section class="block" id="corridor">
+      <div class="block-head">
+        <h2 data-i18n="corridorH2">Checks by corridor</h2>
+        <button type="button" id="exportCsvBtn" class="btn btn-ghost-dark" data-i18n="exportBtn">⬇ Export CSV</button>
+      </div>
+      <div class="sub" data-i18n="corridorSub" style="margin:-8px 0 14px;">Origin country of each checked number — real breakdown of your verification log, for policy and reporting use.</div>
+      <div id="corridorContainer"><div class="loading-state" data-i18n="loadingCorridor">Loading corridor breakdown…</div></div>
+    </section>
 
     <section class="block" id="pending">
       <div class="block-head">
@@ -377,33 +388,41 @@
     en: {
       dir: "ltr",
       navAbout: "About", navHow: "How it works", orgTag: "NGO ACCOUNT", logoutBtn: "Log out",
-      sidebarLabel: "DASHBOARD", navOverview: "Overview", navPending: "Pending Reports", navActivity: "Recent Activity",
+      sidebarLabel: "DASHBOARD", navOverview: "Overview", navPending: "Pending Reports", navActivity: "Recent Activity", navCorridor: "Corridor Breakdown",
       sidebarFoot: "Ministry of Labor<br>Demo account",
       pageH1: "Reports and verification activity",
       pageP: "Review worker-submitted reports and monitor recent checks across your corridor.",
-      statChecksLbl: "Checks run (30 days)", statChecksTrend: "↑ 18% vs last month",
-      statHighRiskLbl: "Flagged high risk", statHighRiskTrend: "↑ 2 this week",
+      statChecksLbl: "Checks run (30 days)",
+      statHighRiskLbl: "Flagged high risk",
       statPendingLbl: "Reports awaiting review", statVerifiedLbl: "NGO-verified reports",
       chart1H: "Checks over the last 7 days", chart1Sub: "Verification volume across your corridor",
       chart2H: "Verdict breakdown", chart2Sub: "Recent checks by risk level",
       pendingH2: "Pending reports", loadingPending: "Loading pending reports…",
       activityH2: "Recent verifications", loadingActivity: "Loading recent activity…",
+      corridorH2: "Checks by corridor", exportBtn: "⬇ Export CSV",
+      corridorSub: "Origin country of each checked number — real breakdown of your verification log, for policy and reporting use.",
+      loadingCorridor: "Loading corridor breakdown…", noCorridorData: "No checks yet.",
+      exportingBtn: "Exporting…", exportFailed: "Export failed — try again.",
       langToggleLabel: "العربية",
     },
     ar: {
       dir: "rtl",
       navAbout: "حول", navHow: "كيف يعمل", orgTag: "حساب منظمة", logoutBtn: "تسجيل الخروج",
-      sidebarLabel: "لوحة التحكم", navOverview: "نظرة عامة", navPending: "البلاغات المعلقة", navActivity: "النشاط الأخير",
+      sidebarLabel: "لوحة التحكم", navOverview: "نظرة عامة", navPending: "البلاغات المعلقة", navActivity: "النشاط الأخير", navCorridor: "تفصيل حسب الممر",
       sidebarFoot: "وزارة العمل<br>حساب تجريبي",
       pageH1: "البلاغات ونشاط التحقق",
       pageP: "راجع البلاغات المقدمة من العمال وراقب الفحوصات الأخيرة عبر ممرك.",
-      statChecksLbl: "الفحوصات (30 يومًا)", statChecksTrend: "↑ 18% مقارنة بالشهر الماضي",
-      statHighRiskLbl: "خطر مرتفع تم رصده", statHighRiskTrend: "↑ 2 هذا الأسبوع",
+      statChecksLbl: "الفحوصات (30 يومًا)",
+      statHighRiskLbl: "خطر مرتفع تم رصده",
       statPendingLbl: "بلاغات بانتظار المراجعة", statVerifiedLbl: "بلاغات موثّقة من المنظمة",
       chart1H: "الفحوصات خلال آخر 7 أيام", chart1Sub: "حجم التحقق عبر ممرك",
       chart2H: "توزيع القرارات", chart2Sub: "الفحوصات الأخيرة حسب مستوى الخطر",
       pendingH2: "البلاغات المعلقة", loadingPending: "جارٍ تحميل البلاغات المعلقة…",
       activityH2: "التحققات الأخيرة", loadingActivity: "جارٍ تحميل النشاط الأخير…",
+      corridorH2: "الفحوصات حسب الممر", exportBtn: "⬇ تصدير CSV",
+      corridorSub: "بلد المنشأ لكل رقم تم فحصه — تفصيل حقيقي لسجل التحقق الخاص بك، لأغراض السياسات والتقارير.",
+      loadingCorridor: "جارٍ تحميل تفصيل الممرات…", noCorridorData: "لا توجد فحوصات بعد.",
+      exportingBtn: "جارٍ التصدير…", exportFailed: "فشل التصدير — حاول مرة أخرى.",
       langToggleLabel: "English",
     },
   };
@@ -444,7 +463,31 @@
     { phoneNumber: "+966 55 010 2233", riskLevel: "LOW", reasoning: "Same SIM and device for over a year.", created_at: "2026-09-07T19:03:00Z" },
   ];
 
-  const MOCK_TREND = { labels: ["Tue","Wed","Thu","Fri","Sat","Sun","Mon"], values: [8, 11, 6, 14, 9, 5, 12] };
+  // Builds the last-7-days trend from real log timestamps — one bucket per
+  // day, oldest to newest, ending today. Replaces what used to be a
+  // hardcoded MOCK_TREND array that never reflected the logs actually
+  // shown on this page.
+  function buildTrendFromLogs(logs){
+    const days = [];
+    for (let i = 6; i >= 0; i--){
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      days.push(d);
+    }
+    const dayKey = (d) => d.toISOString().slice(0, 10);
+    const counts = Object.fromEntries(days.map(d => [dayKey(d), 0]));
+    logs.forEach(l => {
+      const key = dayKey(new Date(l.created_at));
+      if (key in counts) counts[key] += 1;
+    });
+    const weekdayFmt = currentLang === "ar"
+      ? new Intl.DateTimeFormat("ar", { weekday: "short" })
+      : new Intl.DateTimeFormat("en", { weekday: "short" });
+    return {
+      labels: days.map(d => weekdayFmt.format(d)),
+      values: days.map(d => counts[dayKey(d)]),
+    };
+  }
 
   async function fetchPendingReports(){
     try{
@@ -481,6 +524,68 @@
       if (!res.ok) throw 0; return await res.json();
     }catch(err){ return { success:true, demo:true }; }
   }
+
+  // Real corridor breakdown — GET /api/ngo/analytics/summary, computed
+  // server-side from the same audit log /logs and the charts use. No mock
+  // fallback with fabricated countries: if the fetch fails, this panel
+  // just shows empty rather than pretending to have data it doesn't.
+  async function fetchCorridorBreakdown(){
+    try{
+      const res = await fetch(`${API_BASE}/ngo/analytics/summary`, { headers: authHeaders() });
+      if (!res.ok) throw 0;
+      const data = await res.json();
+      return data.byCorridor || [];
+    }catch(err){ return []; }
+  }
+
+  function renderCorridor(byCorridor){
+    const container = document.getElementById("corridorContainer");
+    if (!byCorridor.length){
+      container.innerHTML = `<div class="empty-state">${TRANSLATIONS[currentLang].noCorridorData}</div>`;
+      return;
+    }
+    const max = Math.max(...byCorridor.map(c => c.count), 1);
+    const rows = byCorridor.map(c => `
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
+        <div style="width:150px; font-size:13.5px; flex-shrink:0;">${c.corridor}</div>
+        <div style="flex:1; background:rgba(18,21,27,0.06); border-radius:4px; overflow:hidden; height:18px;">
+          <div style="width:${(c.count/max*100).toFixed(1)}%; background:#FF6A00; height:100%;"></div>
+        </div>
+        <div style="width:32px; text-align:right; font-size:13px; font-weight:600; flex-shrink:0;">${c.count}</div>
+      </div>`).join("");
+    container.innerHTML = rows;
+  }
+
+  // CSV export — real authenticated download from GET /api/ngo/export.
+  // Fetched (not a plain <a href>) because the endpoint needs the JWT in
+  // an Authorization header, which a plain link can't send; the response
+  // is turned into a Blob and downloaded via a throwaway <a>.
+  async function exportCsv(){
+    const btn = document.getElementById("exportCsvBtn");
+    const dict = TRANSLATIONS[currentLang];
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = dict.exportingBtn;
+    try{
+      const res = await fetch(`${API_BASE}/ngo/export`, { headers: authHeaders() });
+      if (!res.ok) throw 0;
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `trustline-verification-log-${new Date().toISOString().slice(0,10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }catch(err){
+      alert(dict.exportFailed);
+    }finally{
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
+  }
+  document.getElementById("exportCsvBtn").addEventListener("click", exportCsv);
 
   const RISK_LABEL = { HIGH:"High risk", MEDIUM:"Caution", LOW:"Low risk" };
   const RISK_LABEL_AR = { HIGH:"خطر مرتفع", MEDIUM:"تحذير", LOW:"خطر منخفض" };
@@ -578,8 +683,7 @@
     // Bar chart — hand-built SVG, no external chart library, so this
     // renders identically everywhere with zero network dependency.
     const trendEl = document.getElementById("trendChart");
-    const values = MOCK_TREND.values;
-    const labels = MOCK_TREND.labels;
+    const { labels, values } = buildTrendFromLogs(logs);
     const max = Math.max(...values, 1);
     const w = 380, h = 190, padBottom = 26, barGap = 10;
     const barW = (w - barGap * (values.length - 1)) / values.length;
@@ -625,11 +729,12 @@
   }
 
   (async function init(){
-    const [pending, logs] = await Promise.all([fetchPendingReports(), fetchRecentLogs()]);
+    const [pending, logs, byCorridor] = await Promise.all([fetchPendingReports(), fetchRecentLogs(), fetchCorridorBreakdown()]);
     renderStats(pending, logs);
     renderPending(pending);
     renderLogs(logs);
     renderCharts(logs);
+    renderCorridor(byCorridor);
   })();
 
   document.getElementById("logoutLink").addEventListener("click", () => {

@@ -11,7 +11,8 @@
  * signalsUsed } }). Rather than change every route, this file translates
  * once, in one place.
  *
- * CONTRACT (extended — reasoningTrace added, everything else unchanged):
+ * CONTRACT (extended — reasoningTrace and signals added, everything else
+ * unchanged):
  *   runVerification(phoneNumber: string, claimedLocation?: string)
  *     -> Promise<{
  *          phoneNumber: string,
@@ -21,9 +22,17 @@
  *            reasoning: string,
  *            signalsUsed: string[]
  *          },
- *          reasoningTrace: { step: string, detail: string }[]
+ *          reasoningTrace: { step: string, detail: string }[],
+ *          signals: Record<string, { available: boolean, ... } | null>
  *        }>
  *   Throws on invalid input (route layer catches and returns 400).
+ *
+ * NOTE on `signals`: this is the graph's raw per-check state (e.g.
+ * signals.simSwap = { available: true, swapped: false }), added so the
+ * frontend can render a real per-signal status breakdown (a colored chip
+ * per check) instead of parsing it back out of the free-text reasoning
+ * trace. A key is `null` if that node never ran at all (e.g. not
+ * escalated to); `{ available: false, error }` if it ran but failed.
  *
  * NOTE on claimedLocation: despite the generic name (kept for route
  * compatibility), agent/graph.js's locationVerificationCheck node expects
@@ -59,6 +68,8 @@ async function runVerification(phoneNumber, claimedLocation = null) {
     // trace internally; the frontend's expandable "how we got this" panel
     // consumes it directly.
     reasoningTrace: state.reasoningTrace || [],
+    // Additive field — see CONTRACT note above.
+    signals: state.signals || {},
   };
 }
 

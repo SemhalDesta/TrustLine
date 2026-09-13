@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" id="htmlRoot">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -115,15 +115,16 @@
     TrustLine
   </a>
   <nav>
-    <a class="navlink" href="verify.html">Check a number</a>
-    <a class="navlink" href="about.html">About</a>
+    <a class="navlink" href="verify.html" data-i18n="navCheck">Check a number</a>
+    <a class="navlink" href="about.html" data-i18n="navAbout">About</a>
+    <button type="button" id="langToggle" style="background:none; border:1px solid var(--line-dark); color:inherit; font-size:13px; padding:6px 14px; border-radius:6px; cursor:pointer; font-family:'Inter', sans-serif;">العربية</button>
   </nav>
 </header>
 
 <main>
-  <div class="eyebrow">For recruiters</div>
-  <h1>Prove you own the number you advertise</h1>
-  <p class="lede">
+  <div class="eyebrow" data-i18n="eyebrow">For recruiters</div>
+  <h1 data-i18n="headline">Prove you own the number you advertise</h1>
+  <p class="lede" data-i18n="lede">
     This is a separate, one-time step for legitimate recruiters — not for
     workers. It uses live network verification to confirm you're really
     holding the phone behind the number you register, the same way a
@@ -133,20 +134,21 @@
   <div class="card">
     <form id="registerForm">
       <div class="field">
-        <label for="phoneInput">Your phone number</label>
+        <label for="phoneInput" data-i18n="fieldLabel">Your phone number</label>
         <input id="phoneInput" type="tel" placeholder="+971 5X XXX XXXX" autocomplete="tel">
       </div>
-      <div class="hint">Include the country code. You'll complete the next step on this same phone.</div>
-      <button type="submit" class="btn-primary" id="startBtn">Verify my number</button>
+      <div class="hint" data-i18n="hint">Include the country code. You'll complete the next step on this same phone.</div>
+      <button type="submit" class="btn-primary" id="startBtn" data-i18n="startBtn">Verify my number</button>
       <div class="error-text" id="formError"></div>
     </form>
 
     <div class="warning-box">
-      <strong>Important:</strong> the next step must be completed on this
+      <strong data-i18n="warningStrong">Important:</strong>
+      <span data-i18n="warningText"> the next step must be completed on this
       phone's own mobile data connection — not WiFi, a VPN, or a hotspot.
       The network confirms your identity by checking which SIM your
       connection is actually coming from, so it can't be done from a
-      different device or a desktop browser.
+      different device or a desktop browser.</span>
     </div>
 
     <div id="resultBox"></div>
@@ -157,6 +159,72 @@
 <script>
   const API_BASE = "http://localhost:4000/api";
 
+  const TRANSLATIONS = {
+    en: {
+      dir: "ltr",
+      navCheck: "Check a number", navAbout: "About",
+      eyebrow: "For recruiters",
+      headline: "Prove you own the number you advertise",
+      lede: "This is a separate, one-time step for legitimate recruiters — not for workers. It uses live network verification to confirm you're really holding the phone behind the number you register, the same way a worker's check confirms signals about a number, but from your side.",
+      fieldLabel: "Your phone number",
+      hint: "Include the country code. You'll complete the next step on this same phone.",
+      startBtn: "Verify my number",
+      preparingBtn: "Preparing verification…",
+      warningStrong: "Important:",
+      warningText: " the next step must be completed on this phone's own mobile data connection — not WiFi, a VPN, or a hotspot. The network confirms your identity by checking which SIM your connection is actually coming from, so it can't be done from a different device or a desktop browser.",
+      emptyPhoneError: "Enter your phone number to continue.",
+      genericStartError: "Couldn't start verification. Please try again.",
+      unreachableError: "Couldn't reach the server. Is the backend running?",
+      redirectingStatus: "Redirecting you to your network provider for verification…",
+      verifiedTitle: "✓ Number verified",
+      verifiedBody: (n) => `${n} has been confirmed as a registered TrustLine recruiter number.`,
+      failedTitle: "Verification unsuccessful",
+      failedDefaultReason: "Verification could not be completed.",
+      langToggleLabel: "العربية",
+    },
+    ar: {
+      dir: "rtl",
+      navCheck: "تحقق من رقم", navAbout: "حول",
+      eyebrow: "للمُجنِّدين",
+      headline: "أثبت ملكيتك للرقم الذي تعلن عنه",
+      lede: "هذه خطوة منفصلة تتم لمرة واحدة للمُجنِّدين الشرعيين — وليست للعمال. تستخدم التحقق الفعلي عبر الشبكة لتأكيد أنك تحمل فعلاً الهاتف الذي يقف خلف الرقم الذي تسجله، بنفس طريقة تحقق العامل من إشارات الرقم، لكن من جانبك.",
+      fieldLabel: "رقم هاتفك",
+      hint: "أدخل رمز الدولة. ستكمل الخطوة التالية على نفس هذا الهاتف.",
+      startBtn: "تحقق من رقمي",
+      preparingBtn: "جارٍ التحضير للتحقق…",
+      warningStrong: "مهم:",
+      warningText: " يجب إكمال الخطوة التالية باستخدام بيانات الجوال الخاصة بهذا الهاتف — وليس عبر واي فاي أو VPN أو نقطة اتصال. تتحقق الشبكة من هويتك عبر التأكد من شريحة الاتصال (SIM) الفعلية، لذا لا يمكن إتمام هذا من جهاز آخر أو متصفح سطح مكتب.",
+      emptyPhoneError: "أدخل رقم هاتفك للمتابعة.",
+      genericStartError: "تعذّر بدء عملية التحقق. حاول مرة أخرى.",
+      unreachableError: "تعذّر الوصول إلى الخادم. هل يعمل الخادم الخلفي؟",
+      redirectingStatus: "جارٍ تحويلك إلى مزود الشبكة للتحقق…",
+      verifiedTitle: "✓ تم التحقق من الرقم",
+      verifiedBody: (n) => `تم تأكيد ${n} كرقم مُجنِّد مسجَّل في TrustLine.`,
+      failedTitle: "فشل التحقق",
+      failedDefaultReason: "تعذّر إكمال عملية التحقق.",
+      langToggleLabel: "English",
+    },
+  };
+
+  let currentLang = "en";
+
+  function applyLanguage() {
+    const dict = TRANSLATIONS[currentLang];
+    document.getElementById("htmlRoot").setAttribute("lang", currentLang);
+    document.getElementById("htmlRoot").setAttribute("dir", dict.dir);
+    document.querySelectorAll("[data-i18n]").forEach((el) => {
+      const key = el.getAttribute("data-i18n");
+      if (dict[key]) el.textContent = dict[key];
+    });
+    document.getElementById("langToggle").textContent = dict.langToggleLabel;
+    if (!startBtn.disabled) startBtn.textContent = dict.startBtn;
+  }
+
+  document.getElementById("langToggle").addEventListener("click", () => {
+    currentLang = currentLang === "en" ? "ar" : "en";
+    applyLanguage();
+  });
+
   const form = document.getElementById("registerForm");
   const phoneInput = document.getElementById("phoneInput");
   const startBtn = document.getElementById("startBtn");
@@ -166,35 +234,36 @@
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
+    const dict = TRANSLATIONS[currentLang];
     const phoneNumber = phoneInput.value.trim();
     if (!phoneNumber) {
-      formError.textContent = "Enter your phone number to continue.";
+      formError.textContent = dict.emptyPhoneError;
       formError.classList.add("show");
       return;
     }
     formError.classList.remove("show");
     startBtn.disabled = true;
-    startBtn.textContent = "Preparing verification…";
+    startBtn.textContent = dict.preparingBtn;
 
     try {
       const res = await fetch(`${API_BASE}/recruiter/register/start?phoneNumber=${encodeURIComponent(phoneNumber)}`);
       const data = await res.json();
       if (!res.ok) {
-        formError.textContent = data.error || "Couldn't start verification. Please try again.";
+        formError.textContent = data.error || dict.genericStartError;
         formError.classList.add("show");
         startBtn.disabled = false;
-        startBtn.textContent = "Verify my number";
+        startBtn.textContent = dict.startBtn;
         return;
       }
-      statusText.textContent = "Redirecting you to your network provider for verification…";
+      statusText.textContent = dict.redirectingStatus;
       // This redirect MUST happen on the recruiter's own device over real
       // cellular data — that's the entire point of this flow.
       window.location.href = data.authorizeUrl;
     } catch (err) {
-      formError.textContent = "Couldn't reach the server. Is the backend running?";
+      formError.textContent = dict.unreachableError;
       formError.classList.add("show");
       startBtn.disabled = false;
-      startBtn.textContent = "Verify my number";
+      startBtn.textContent = dict.startBtn;
     }
   });
 
@@ -205,20 +274,21 @@
     const status = params.get("status");
     if (!status) return;
 
+    const dict = TRANSLATIONS[currentLang];
     form.style.display = "none";
 
     if (status === "verified") {
       const phoneNumber = params.get("phoneNumber") || "";
       resultBox.innerHTML = `
         <div class="result-box verified">
-          <h3>✓ Number verified</h3>
-          <p>${phoneNumber} has been confirmed as a registered TrustLine recruiter number.</p>
+          <h3>${dict.verifiedTitle}</h3>
+          <p>${dict.verifiedBody(phoneNumber)}</p>
         </div>`;
     } else {
-      const reason = params.get("reason") || "Verification could not be completed.";
+      const reason = params.get("reason") || dict.failedDefaultReason;
       resultBox.innerHTML = `
         <div class="result-box failed">
-          <h3>Verification unsuccessful</h3>
+          <h3>${dict.failedTitle}</h3>
           <p>${reason}</p>
         </div>`;
     }

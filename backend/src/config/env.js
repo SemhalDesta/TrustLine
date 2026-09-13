@@ -13,18 +13,16 @@ module.exports = {
   port: process.env.PORT || 4000,
   nodeEnv: process.env.NODE_ENV || "development",
 
-  // Owned by Track B (this file), consumed by Track A's camaraClient.js.
-  // Filling these in now means Track A can plug in the real API the moment
-  // their code is ready — no waiting on you.
+
   nokia: {
-    baseUrl: required("NOKIA_NAC_BASE_URL"),
-    apiKey: required("NOKIA_NAC_API_KEY"),
-    clientId: required("NOKIA_NAC_CLIENT_ID"),
-    clientSecret: required("NOKIA_NAC_CLIENT_SECRET"),
+    baseUrl: required("CAMARA_API_BASE_URL"),
+    apiKey: required("CAMARA_RAPIDAPI_KEY"),
+    clientId: required("CAMARA_CLIENT_ID"),
+    clientSecret: required("CAMARA_CLIENT_SECRET"),
   },
 
   agent: {
-    anthropicApiKey: required("ANTHROPIC_API_KEY"),
+    anthropicApiKey: required("GROQ_API_KEY"),
     model: process.env.AGENT_MODEL || "claude-sonnet-4-5",
   },
 
@@ -37,7 +35,13 @@ module.exports = {
   twilio: {
     accountSid: process.env.TWILIO_ACCOUNT_SID,
     authToken: process.env.TWILIO_AUTH_TOKEN,
-    fromNumber: process.env.TWILIO_FROM_NUMBER,
+    // Two DIFFERENT sender numbers — Twilio does not let a plain SMS send
+    // "from" a WhatsApp sandbox number (whatsapp:+1415...) and vice versa.
+    // smsFromNumber must be a real, SMS-capable number on this account
+    // (Console -> Phone Numbers). whatsappFromNumber is normally the
+    // shared Twilio WhatsApp Sandbox number for testing.
+    smsFromNumber: process.env.TWILIO_FROM_NUMBER,
+    whatsappFromNumber: process.env.TWILIO_WHATSAPP_FROM,
   },
 
   rateLimit: {

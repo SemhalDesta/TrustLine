@@ -47,6 +47,21 @@ const verifiedRecruiters = new Map(); // hash -> { phoneNumberEncrypted, verifie
   });
 }
 
+// Seed one demo-verified recruiter number too — the real three-legged
+// Number Verification flow (routes/recruiter.js) needs an actual phone on
+// real cellular data to complete, which isn't reproducible in a demo/CI
+// environment. Without this, the badge tool's live check could only ever
+// show its "not verified" branch. Uses the same placeholder number already
+// shown in the platform dashboard's badge-number input, so trying the
+// default value there demonstrates a genuine verified result.
+{
+  const seedRecruiter = "+971501234567";
+  verifiedRecruiters.set(hashPhoneNumber(seedRecruiter), {
+    phoneNumberEncrypted: encryptPhoneNumber(seedRecruiter),
+    verifiedAt: new Date().toISOString(),
+  });
+}
+
 function purgeExpiredLogs() {
   const cutoff = Date.now() - RETENTION_DAYS * 24 * 60 * 60 * 1000;
   while (auditLog.length && new Date(auditLog[0].at).getTime() < cutoff) {
